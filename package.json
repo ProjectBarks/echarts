@@ -1,0 +1,27 @@
+{
+  "name": "echarts-internal",
+  "version": "1.0.0",
+  "description": "Zero-config DAG flow visualizer for ECharts — drop-in critical path analysis, barycenter layout, and interactive filtering for Grafana Business Charts panels",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./flow-graph": "./graphs/flow-graph.js"
+  },
+  "keywords": [
+    "echarts", "dag", "directed-acyclic-graph", "graph", "visualization",
+    "grafana", "business-charts", "critical-path", "flow", "task-flow",
+    "node-graph", "barycenter", "layout", "observability", "latency"
+  ],
+  "author": "ProjectBarks",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ProjectBarks/echarts-internal.git"
+  },
+  "homepage": "https://github.com/ProjectBarks/echarts-internal#readme",
+  "bugs": {
+    "url": "https://github.com/ProjectBarks/echarts-internal/issues"
+  }
+}
