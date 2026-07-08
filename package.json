@@ -5,14 +5,30 @@
   "type": "module",
   "main": "index.js",
   "module": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "exports": {
     ".": "./index.js",
     "./flow-graph": "./graphs/flow-graph.js"
   },
   "keywords": [
-    "echarts", "dag", "directed-acyclic-graph", "graph", "visualization",
-    "grafana", "business-charts", "critical-path", "flow", "task-flow",
-    "node-graph", "barycenter", "layout", "observability", "latency"
+    "echarts",
+    "dag",
+    "directed-acyclic-graph",
+    "graph",
+    "visualization",
+    "grafana",
+    "business-charts",
+    "critical-path",
+    "flow",
+    "task-flow",
+    "node-graph",
+    "barycenter",
+    "layout",
+    "observability",
+    "latency"
   ],
   "author": "ProjectBarks",
   "license": "MIT",
@@ -23,5 +39,9 @@
   "homepage": "https://github.com/ProjectBarks/echarts-internal#readme",
   "bugs": {
     "url": "https://github.com/ProjectBarks/echarts-internal/issues"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.9"
   }
 }

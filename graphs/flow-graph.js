@@ -98,6 +98,42 @@ export function renderFlowGraph(context, opts = {}) {
     if (!bwd[tgt]) bwd[tgt] = new Set(); bwd[tgt].add(src);
   }
 
+  // The layout math below (longest-path depth, reachability counts, barycenter
+  // ordering) assumes a DAG. Real path metrics can describe cycles — a retry
+  // loop that revisits a task produces a path like `a_b_a`, and over a wide time
+  // range two tasks can appear in both orders (`a_b` and `b_a`). A cycle makes
+  // the depth relaxation never terminate (it keeps finding a "longer" path
+  // around the loop), which pegged the panel at ~100% CPU. Strip back-edges via
+  // an iterative DFS so `fwd`/`bwd` are acyclic. Back-edges stay in `cleanEdges`
+  // (and therefore in the drawn links) so the loop is still visible.
+  {
+    const GRAY = 1, BLACK = 2;
+    const color = {};
+    const starts = [ROOT, ...Object.keys(fwd), ...Object.keys(bwd)];
+    for (const start of starts) {
+      if (color[start] === GRAY || color[start] === BLACK) continue;
+      color[start] = GRAY;
+      const stack = [{ node: start, kids: [...(fwd[start] || [])], i: 0 }];
+      while (stack.length) {
+        const frame = stack[stack.length - 1];
+        if (frame.i < frame.kids.length) {
+          const nb = frame.kids[frame.i++];
+          if (color[nb] === GRAY) {
+            // Edge into a node still on the DFS stack: a back-edge. Drop it.
+            if (fwd[frame.node]) fwd[frame.node].delete(nb);
+            if (bwd[nb]) bwd[nb].delete(frame.node);
+          } else if (color[nb] !== BLACK) {
+            color[nb] = GRAY;
+            stack.push({ node: nb, kids: [...(fwd[nb] || [])], i: 0 });
+          }
+        } else {
+          color[frame.node] = BLACK;
+          stack.pop();
+        }
+      }
+    }
+  }
+
   const cumulLat = {};
   for (const { path } of paths) {
     const chain = [ROOT, ...path.split('_')].filter(n => !dropNodes.has(n));
