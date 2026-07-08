@@ -6,6 +6,10 @@
   "main": "index.js",
   "module": "index.js",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -41,7 +45,9 @@
     "url": "https://github.com/ProjectBarks/echarts-internal/issues"
   },
   "devDependencies": {
+    "echarts": "^5.6.0",
     "jsdom": "^29.1.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.9"
   }
 }
