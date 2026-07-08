@@ -53,7 +53,7 @@ import("https://esm.sh/echarts-internal").then(({ renderFlowGraph }) => {
 Import a specific graph directly:
 
 ```js
-import("https://esm.sh/echarts-internal/graphs/flow-graph").then(({ renderFlowGraph }) => {
+import("https://esm.sh/echarts-internal/flow-graph").then(({ renderFlowGraph }) => {
   context.panel.chart.setOption(renderFlowGraph(context));
 });
 ```
@@ -133,15 +133,15 @@ return renderFlowGraph(context, {
 
 ## Add a New Graph
 
-1. Create `graphs/your-graph.js` exporting a function that takes `(context, options?)` and returns an ECharts option object
-2. Re-export from `index.js`
+1. Create `graphs/your-graph/index.ts` exporting a function that takes `(context, options?)` and returns an ECharts option object
+2. Re-export from `index.ts`
 3. Add an entry to the `exports` map in `package.json`
 4. Document the expected query shape and options in this README
 
 ```js
-// graphs/your-graph.js
-export function renderYourGraph(context, opts = {}) {
-  const series = context.panel.data.series || [];
+// graphs/your-graph/index.ts
+export function renderYourGraph(context: GrafanaContext, opts: Record<string, unknown> = {}) {
+  const series = context.panel.data?.series || [];
   // ... your computation ...
   return { /* ECharts option */ };
 }

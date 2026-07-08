@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "description": "Zero-config DAG flow visualizer for ECharts — drop-in critical path analysis, barycenter layout, and interactive filtering for Grafana Business Charts panels",
   "type": "module",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -14,8 +20,16 @@
     "test:watch": "vitest"
   },
   "exports": {
-    ".": "./index.js",
-    "./flow-graph": "./graphs/flow-graph.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./flow-graph": {
+      "types": "./dist/graphs/flow-graph/index.d.ts",
+      "import": "./dist/graphs/flow-graph/index.js",
+      "default": "./dist/graphs/flow-graph/index.js"
+    }
   },
   "keywords": [
     "echarts",
