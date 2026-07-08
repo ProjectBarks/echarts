@@ -9,7 +9,7 @@
 // hang itself regresses the render never returns and the run fails on timeout.
 
 import { describe, test, expect } from 'vitest';
-import { renderFlowGraph } from '../graphs/flow-graph.js';
+import { renderFlowGraph } from '../graphs/flow-graph/index.js';
 import { renderSummary } from './helpers/build-context.js';
 import { CASES } from './helpers/cases.js';
 
