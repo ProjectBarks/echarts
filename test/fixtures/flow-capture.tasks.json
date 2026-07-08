@@ -1,0 +1,108 @@
+{
+  "source": "workflow.task.duration",
+  "window": "12h",
+  "note": "Anonymized capture: task names replaced with stable placeholders.",
+  "count": 25,
+  "rows": [
+    {
+      "task": "node4",
+      "avg": 640
+    },
+    {
+      "task": "node3",
+      "avg": 91
+    },
+    {
+      "task": "node24",
+      "avg": 84
+    },
+    {
+      "task": "node22",
+      "avg": 84
+    },
+    {
+      "task": "node6",
+      "avg": 66
+    },
+    {
+      "task": "node9",
+      "avg": 60
+    },
+    {
+      "task": "node10",
+      "avg": 60
+    },
+    {
+      "task": "node1",
+      "avg": 13
+    },
+    {
+      "task": "node13",
+      "avg": 8
+    },
+    {
+      "task": "node15",
+      "avg": 5
+    },
+    {
+      "task": "node20",
+      "avg": 5
+    },
+    {
+      "task": "node21",
+      "avg": 4
+    },
+    {
+      "task": "node12",
+      "avg": 3
+    },
+    {
+      "task": "node11",
+      "avg": 2
+    },
+    {
+      "task": "node7",
+      "avg": 2
+    },
+    {
+      "task": "node8",
+      "avg": 1
+    },
+    {
+      "task": "node16",
+      "avg": 1
+    },
+    {
+      "task": "node23",
+      "avg": 1
+    },
+    {
+      "task": "node19",
+      "avg": 1
+    },
+    {
+      "task": "node18",
+      "avg": 1
+    },
+    {
+      "task": "node14",
+      "avg": 1
+    },
+    {
+      "task": "node25",
+      "avg": 1
+    },
+    {
+      "task": "node2",
+      "avg": 1
+    },
+    {
+      "task": "node5",
+      "avg": 1
+    },
+    {
+      "task": "node26",
+      "avg": 1
+    }
+  ]
+}
