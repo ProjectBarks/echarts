@@ -1,27 +1,8 @@
 import { buildAdjacency, removeBackEdges, longestPathDepth, countReachable } from '../common/graph.js';
 import { median } from '../common/math.js';
+import { computeCumulativeLatency } from '../common/path-metrics.js';
 import type { EdgeMap, NodeLatMap, AdjMap } from '../common/types.js';
 import type { Path, LayoutResult } from './types.js';
-
-export function computeCumulativeLatency(
-  paths: Path[],
-  nodeLat: NodeLatMap,
-  dropNodes: Set<string>,
-  root: string,
-): { cumulLat: NodeLatMap; maxCumul: number; maxLat: number } {
-  const cumulLat: NodeLatMap = {};
-  for (const { path } of paths) {
-    const chain = [root, ...path.split('_')].filter((n) => !dropNodes.has(n));
-    let cumul = 0;
-    for (const n of chain) {
-      cumul += nodeLat[n] || 0;
-      cumulLat[n] = Math.max(cumulLat[n] || 0, cumul);
-    }
-  }
-  const maxCumul = Math.max(...Object.values(cumulLat), 1);
-  const maxLat = Math.max(...Object.values(nodeLat), 1);
-  return { cumulLat, maxCumul, maxLat };
-}
 
 export function assignLayers(
   nodeLat: NodeLatMap,
