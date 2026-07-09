@@ -13,7 +13,7 @@ function mockApi(values) {
 describe('barRenderItem', () => {
   test('draws a rect with an inside label for a wide bar', () => {
     // value = [start, end, row, name, color, durationMs]; width = (5-0)*10 = 50px >= 42 -> inside
-    const g = barRenderItem({}, mockApi([0, 5, 1, 'x', '#abc', 5]));
+    const g = barRenderItem({}, mockApi([0, 5, 1, 'x', '#abc', 5, 'ms']));
     expect(g.type).toBe('group');
     const rect = g.children[0];
     expect(rect.type).toBe('rect');
@@ -24,7 +24,7 @@ describe('barRenderItem', () => {
     expect(label.style.text).toBe('5 ms');
   });
   test('floors a zero-duration node to a visible min-width rect with no label', () => {
-    const g = barRenderItem({}, mockApi([3, 3, 0, 'FLOW_START', '#69db7c', 0]));
+    const g = barRenderItem({}, mockApi([3, 3, 0, 'FLOW_START', '#69db7c', 0, 'ms']));
     expect(g.type).toBe('group');
     const rect = g.children[0];
     expect(rect.type).toBe('rect');

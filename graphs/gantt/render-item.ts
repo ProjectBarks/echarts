@@ -23,6 +23,7 @@ export function barRenderItem(_params: any, api: any): any {
   const row = api.value(2) as number;
   const color = api.value(4) as string;
   const durMs = api.value(5) as number;
+  const unit = (api.value(6) as string) || '';
   const p0 = api.coord([start, row]);
   const p1 = api.coord([end, row]);
   const h = barThickness(api);
@@ -33,7 +34,7 @@ export function barRenderItem(_params: any, api: any): any {
     { type: 'rect', shape: { x: p0[0], y: p0[1] - h / 2, width, height: h, r: 3 }, style: { fill: color, opacity: 0.95 } },
   ];
   if (rounded >= 1) {
-    const label = rounded + ' ms';
+    const label = rounded + ' ' + unit;
     const inside = width >= 42;
     children.push(
       inside

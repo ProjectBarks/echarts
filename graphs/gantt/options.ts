@@ -7,10 +7,11 @@ export interface GanttTooltipCtx {
   barByName: Record<string, GanttBar>;
   critTotal: number;
   pctl: string;
+  units: string;
 }
 
 export function buildGanttTooltip(ctx: GanttTooltipCtx): (p: any) => string {
-  const { barByName, critTotal, pctl } = ctx;
+  const { barByName, critTotal, pctl, units } = ctx;
   return (p: any) => {
     const bar = barByName[p.name];
     if (!bar) return '';
@@ -23,13 +24,13 @@ export function buildGanttTooltip(ctx: GanttTooltipCtx): (p: any) => string {
       pctl +
       ' duration: <b>' +
       Math.round(bar.duration) +
-      ' ms</b>' +
+      ' ' + units + '</b>' +
       '<br/>starts at: <b>' +
       Math.round(bar.start) +
-      ' ms</b>' +
+      ' ' + units + '</b>' +
       '<br/>ends at: <b>' +
       Math.round(bar.end) +
-      ' ms</b>' +
+      ' ' + units + '</b>' +
       (bar.isCrit ? '<br/>% of critical path: <b>' + critPct + '%</b>' : '')
     );
   };
@@ -41,11 +42,12 @@ export interface AssembleGanttArgs {
   rowNames: string[];
   subtext: string;
   formatter: (p: any) => string;
+  units: string;
 }
 
 export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
-  const { bars, arrows, rowNames, subtext, formatter } = args;
-  const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration] }));
+  const { bars, arrows, rowNames, subtext, formatter, units } = args;
+  const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration, units] }));
   const arrowData = arrows.map((a) => ({
     value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0, a.srcStart],
   }));
@@ -62,7 +64,7 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
     grid: { left: 190, right: 48, top: 52, bottom: 40 },
     xAxis: {
       type: 'value',
-      name: 'cumulative time (ms) →',
+      name: 'time (' + units + ') →',
       nameLocation: 'end',
       nameGap: 24,
       min: -Math.ceil(maxEnd * 0.05),

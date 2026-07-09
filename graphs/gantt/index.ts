@@ -56,10 +56,10 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
 
   const rowNames = layout.bars.map((b) => b.name);
   const critChain = layout.critChain.join(' → ');
-  const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ms p' + pctl + ' — ' + critChain;
-  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl });
+  const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ' + units + ' p' + pctl + ' — ' + critChain;
+  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl, units });
 
-  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter });
+  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units });
 }
 
 export const Gantt = { render: renderGantt } as const;
