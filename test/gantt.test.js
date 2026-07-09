@@ -5,9 +5,9 @@ import { CASES } from './helpers/cases.js';
 
 const BUDGET_MS = 2000;
 
-function summarize(series) {
+function summarize(series, opts = { units: 'ms' }) {
   const start = performance.now();
-  const option = Gantt.render(buildContext(series), {});
+  const option = Gantt.render(buildContext(series), opts);
   const ms = performance.now() - start;
   const bars = (option.series && option.series[1] && option.series[1].data) || [];
   const arrows = (option.series && option.series[0] && option.series[0].data) || [];
@@ -23,8 +23,15 @@ describe('Gantt.render', () => {
   });
 
   test('returns a No data option when there are no paths', () => {
-    const option = Gantt.render(buildContext([['solo', 5]]), {});
+    const option = Gantt.render(buildContext([['solo', 5]]), { units: 'ms' });
     expect(option.title.text).toBe('No data');
+  });
+
+  test('returns a units-required alert when units is missing or blank', () => {
+    const r = summarize(CASES.captured(), {});
+    expect(r.option.title.text).toBe('Set the "units" option to render this chart');
+    const r2 = summarize(CASES.captured(), { units: '  ' });
+    expect(r2.option.title.text).toBe('Set the "units" option to render this chart');
   });
 
   test('terminates on a cyclic captured graph within budget', () => {

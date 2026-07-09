@@ -12,7 +12,14 @@ import { computeGanttLayout } from './layout.js';
 import { buildArrows, assignChannels } from './arrows.js';
 import { assembleGanttOption, buildGanttTooltip } from './options.js';
 
-function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = {}): EChartsOption {
+function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
+  const units = (opts.units || '').trim();
+  if (!units) {
+    return {
+      title: { text: 'Set the "units" option to render this chart', left: 'center', top: 'center', textStyle: { color: '#ccc' } },
+    } as unknown as EChartsOption;
+  }
+
   const root = opts.root || GANTT_DEFAULTS.root;
   const sink = opts.sink || GANTT_DEFAULTS.sink;
   const pctlVar = opts.percentileVar || GANTT_DEFAULTS.percentileVar;
