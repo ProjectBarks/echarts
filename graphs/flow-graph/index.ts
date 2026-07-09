@@ -10,7 +10,13 @@ import { buildMermaid } from './mermaid.js';
 import { setupSlider, buildGraphicButtons } from './interactions.js';
 import { buildTooltipFormatter, assembleOption } from './options.js';
 
-function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = {}): EChartsOption {
+function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = { units: '' }): EChartsOption {
+  const units = (opts.units || '').trim();
+  if (!units) {
+    return {
+      title: { text: 'Set the "units" option to render this chart', left: 'center', top: 'center', textStyle: { color: '#ccc' } },
+    } as unknown as EChartsOption;
+  }
   const root = opts.root || DEFAULTS.root;
   const sink = opts.sink || DEFAULTS.sink;
   const nodeSpacing = opts.nodeSpacing || DEFAULTS.nodeSpacing;
@@ -53,7 +59,7 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
   });
   const { nodePos, cumulLat, maxCumul, maxLat, fwd, bwd } = layout;
 
-  const nodes = buildNodes(nodeLat, { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink });
+  const nodes = buildNodes(nodeLat, { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink, units });
   const links = buildLinks(cleanEdges, critSet);
   for (const l of buildTransitiveHoverEdges(nodeLat, fwd, bwd, cleanEdges)) links.push(l);
 
@@ -76,7 +82,7 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
 
   const sliderPopover = setupSlider(chart, { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink });
   const graphic = buildGraphicButtons(chart, {
-    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet),
+    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet, units),
     sliderPopover,
     fullNodes,
     fullLinks,
@@ -84,8 +90,8 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
     critOnlyLinks,
   });
 
-  const formatter = buildTooltipFormatter({ nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink });
-  const subtext = 'Critical path ≤ ' + Math.round(critTotal) + ' ms p' + pctl + ' — ' + critChain;
+  const formatter = buildTooltipFormatter({ nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink, units });
+  const subtext = 'Critical path ≤ ' + Math.round(critTotal) + ' ' + units + ' p' + pctl + ' — ' + critChain;
 
   return assembleOption({
     nodes,

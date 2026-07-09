@@ -3,6 +3,7 @@ import type { NodeLatMap } from '../common/types.js';
 export type { Path, ParsedData, CritInfo } from '../common/types.js';
 
 export interface RenderFlowGraphOptions {
+  units: string;
   root?: string;
   sink?: string;
   nodeSpacing?: number;

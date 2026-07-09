@@ -1,13 +1,13 @@
 import type { EdgeMap, NodeLatMap } from '../common/types.js';
 
-export function buildMermaid(nodeLat: NodeLatMap, cleanEdges: EdgeMap, critSet: Set<string>): string {
+export function buildMermaid(nodeLat: NodeLatMap, cleanEdges: EdgeMap, critSet: Set<string>, units: string): string {
   let md = 'flowchart LR\n';
   for (const name of Object.keys(nodeLat)) {
     const lat = Math.round(nodeLat[name] || 0);
     const label = name.replace(/predicate$/, '(P)').replace(/dp$/, '');
     md += critSet.has(name)
-      ? '  ' + name + '["' + label + ' ' + lat + 'ms"]:::crit\n'
-      : '  ' + name + '["' + label + ' ' + lat + 'ms"]\n';
+      ? '  ' + name + '["' + label + ' ' + lat + ' ' + units + '"]:::crit\n'
+      : '  ' + name + '["' + label + ' ' + lat + ' ' + units + '"]\n';
   }
   for (const key of Object.keys(cleanEdges)) {
     const [s, t] = key.split('__');

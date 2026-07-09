@@ -10,7 +10,7 @@
 
 import { describe, test, expect } from 'vitest';
 import { FlowGraph } from '../graphs/flow-graph/index.js';
-import { renderSummary } from './helpers/build-context.js';
+import { renderSummary, buildContext } from './helpers/build-context.js';
 import { CASES } from './helpers/cases.js';
 
 const BUDGET_MS = 2000;
@@ -42,5 +42,12 @@ describe('FlowGraph.render', () => {
     expect(r.drawnEdges).toContain('node4->node16');
     expect(r.drawnEdges).toContain('node16->node4');
     expect(r.ms).toBeLessThan(BUDGET_MS);
+  });
+
+  test('returns a units-required alert when units missing', () => {
+    const option = FlowGraph.render(buildContext(CASES.dag()), {});
+    expect(option.title.text).toBe('Set the "units" option to render this chart');
+    const option2 = FlowGraph.render(buildContext(CASES.dag()), { units: '  ' });
+    expect(option2.title.text).toBe('Set the "units" option to render this chart');
   });
 });

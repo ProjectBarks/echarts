@@ -13,13 +13,14 @@ export interface TooltipCtx {
   hasTaskDurations: boolean;
   root: string;
   sink: string;
+  units: string;
 }
 
 export function buildTooltipFormatter(ctx: TooltipCtx): (p: any) => string {
-  const { nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink } = ctx;
+  const { nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink, units } = ctx;
   return (p: any) => {
     if (p.dataType === 'edge') {
-      return '<b>' + p.data.source + ' → ' + p.data.target + '</b><br/>' + p.data.value + ' ms';
+      return '<b>' + p.data.source + ' → ' + p.data.target + '</b><br/>' + p.data.value + ' ' + units;
     }
     const name = p.name;
     const lat = nodeLat[name] || 0;
@@ -45,11 +46,11 @@ export function buildTooltipFormatter(ctx: TooltipCtx): (p: any) => string {
       pctl +
       ' execution: <b>' +
       Math.round(lat) +
-      ' ms</b>' +
+      ' ' + units + '</b>' +
       (onCrit ? '<br/>% of critical path: <b>' + critPct + '%</b>' : '') +
-      '<br/>Cumulative: <b>' +
+      '<br/><b>' +
       Math.round(cumul) +
-      ' ms</b>' +
+      ' ' + units + '</b>' +
       (hasTaskDurations ? '<br/><span style="color:#666">Source: task.duration histogram</span>' : '')
     );
   };

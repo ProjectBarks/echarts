@@ -28,10 +28,11 @@ export interface BuildNodesCtx {
   nodeSize: number;
   root: string;
   sink: string;
+  units: string;
 }
 
 export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[] {
-  const { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink } = ctx;
+  const { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink, units } = ctx;
   return Object.entries(nodeLat)
     .sort((a, b) => b[1] - a[1])
     .map(([name, lat]) => {
@@ -77,7 +78,7 @@ export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[]
           distance: 8,
           color: '#ddd',
           formatter: () => {
-            const ms = lat > 0 ? '  {val| ' + Math.round(lat) + ' ms}' : '';
+            const ms = lat > 0 ? '  {val| ' + Math.round(lat) + ' ' + units + '}' : '';
             return '{name|' + displayName + '}' + ms;
           },
           rich: {

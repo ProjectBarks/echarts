@@ -26,9 +26,9 @@ export function buildContext(series, { width = 1200, height = 700 } = {}) {
 }
 
 // Convenience: render a case by name and return a compact summary of the result.
-export function renderSummary(renderFlowGraph, series) {
+export function renderSummary(renderFlowGraph, series, opts = { units: 'ms' }) {
   const start = performance.now();
-  const option = renderFlowGraph(buildContext(series), {});
+  const option = renderFlowGraph(buildContext(series), opts);
   const ms = performance.now() - start;
   const s0 = (option.series && option.series[0]) || {};
   const data = Array.isArray(s0.data) ? s0.data : [];

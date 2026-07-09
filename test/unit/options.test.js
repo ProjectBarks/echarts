@@ -8,10 +8,11 @@ describe('buildTooltipFormatter', () => {
   test('formats a node tooltip with latency', () => {
     const fmt = buildTooltipFormatter({
       nodeLat: { a: 12 }, cumulLat: { a: 12 }, critSet: new Set(['a']),
-      critTotal: 12, pctl: '95', hasTaskDurations: true, root: ROOT, sink: SINK,
+      critTotal: 12, pctl: '95', hasTaskDurations: true, root: ROOT, sink: SINK, units: 'ms',
     });
     const html = fmt({ dataType: 'node', name: 'a' });
     expect(html).toContain('12 ms');
+    expect(html).not.toContain('Cumulative');
   });
 });
 
