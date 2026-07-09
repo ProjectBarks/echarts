@@ -5,7 +5,6 @@ import { GANTT_DEFAULTS } from './constants.js';
 import {
   parseSeries,
   buildLatencyAndEdges,
-  findCriticalPath,
   dropZeroPredicates,
   computeCleanEdges,
 } from '../common/path-metrics.js';
@@ -33,7 +32,6 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = {}): EC
   }
 
   const { nodeLat, edgeMap } = buildLatencyAndEdges(parsed, root);
-  const crit = findCriticalPath(parsed.paths, nodeLat, root);
   const dropNodes = dropZeroPredicates(nodeLat);
   const cleanEdges = computeCleanEdges(edgeMap, parsed.paths, dropNodes, root);
 
@@ -41,19 +39,18 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = {}): EC
     paths: parsed.paths,
     nodeLat,
     cleanEdges,
-    critSet: crit.critSet,
     root,
     sink,
     dropNodes,
   });
 
-  const arrows = buildArrows(cleanEdges, layout.barByName, layout.depth, crit.critSet);
+  const arrows = buildArrows(layout.barByName, layout.depth, layout.critSet);
   assignChannels(arrows);
 
   const rowNames = layout.bars.map((b) => b.name);
-  const critChain = crit.crit.path.split('_').join(' → ');
-  const subtext = 'Critical path ≤ ' + Math.round(crit.critTotal) + ' ms p' + pctl + ' — ' + critChain;
-  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: crit.critTotal, pctl });
+  const critChain = layout.critChain.join(' → ');
+  const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ms p' + pctl + ' — ' + critChain;
+  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl });
 
   return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter });
 }

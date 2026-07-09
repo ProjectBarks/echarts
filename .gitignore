@@ -5,3 +5,9 @@ dist/
 docs/superpowers/
 CLAUDE.md
 test/gantt-visual/*.png
+# Local-only Gantt visual harness + captured real data (contains internal metric
+# names and auth cookies - never commit)
+test/gantt-visual/real*
+test/gantt-visual/rich.html
+test/gantt-visual/*.network-response
+mockup/

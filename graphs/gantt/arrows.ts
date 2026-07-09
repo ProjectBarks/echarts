@@ -1,28 +1,43 @@
-import type { EdgeMap } from '../common/types.js';
 import type { GanttBar, GanttArrow } from './types.js';
 
-/** One finish-to-start connector per clean edge whose endpoints both have bars. */
+/**
+ * One connector per node, from its binding predecessor (`bar.parent`, computed
+ * in layout as the acyclic in-neighbor whose end sets this node's start). Using
+ * the same parent the row ordering uses keeps arrows and layout consistent and
+ * turns the dependency hairball into a readable waterfall. Any node that somehow
+ * lacks a parent (its predecessors were all dropped) is attached to the nearest
+ * scheduled predecessor so nothing is ever left unconnected.
+ */
 export function buildArrows(
-  cleanEdges: EdgeMap,
   barByName: Record<string, GanttBar>,
   depth: Record<string, number>,
   critSet: Set<string>,
 ): GanttArrow[] {
+  const bars = Object.values(barByName);
+  const root = bars.reduce((m, b) => (b.row < m.row ? b : m), bars[0]);
   const arrows: GanttArrow[] = [];
-  for (const key of Object.keys(cleanEdges)) {
-    const [src, tgt] = key.split('__');
-    const s = barByName[src];
-    const t = barByName[tgt];
-    if (!s || !t) continue;
+  for (const b of bars) {
+    if (b.name === root.name) continue;
+    let parent = b.parent ? barByName[b.parent] : undefined;
+    if (!parent) {
+      // Fallback: nearest scheduled predecessor (greatest end that finishes at or
+      // before this node's start), else the root.
+      for (const c of bars) {
+        if (c.name === b.name) continue;
+        if (c.end <= b.start + 1e-6 && (!parent || c.end > parent.end)) parent = c;
+      }
+      if (!parent) parent = root;
+    }
     arrows.push({
-      source: src,
-      target: tgt,
-      srcEnd: s.end + s.shift,
-      srcRow: s.row,
-      tgtStart: t.start + t.shift,
-      tgtRow: t.row,
-      isCrit: critSet.has(src) && critSet.has(tgt),
-      bucket: depth[tgt] || 0,
+      source: parent.name,
+      target: b.name,
+      srcStart: parent.start,
+      srcEnd: parent.end,
+      srcRow: parent.row,
+      tgtStart: b.start,
+      tgtRow: b.row,
+      isCrit: critSet.has(parent.name) && critSet.has(b.name),
+      bucket: depth[b.name] || 0,
       lane: 0,
     });
   }
@@ -30,37 +45,32 @@ export function buildArrows(
 }
 
 /**
- * Assign each arrow's vertical segment a lane so segments never overlap.
- * Arrows are grouped by target column (bucket); within a bucket the vertical
- * spans form an interval graph, greedily colored so any two arrows with
- * overlapping [top,bottom] row spans land on different lanes. renderItem maps
- * the lane to a pixel offset left of the target bar start.
+ * Channel (lane) assignment for the vertical segments of connectors.
+ *
+ * The renderer places each connector's vertical channel a fixed jetty to the
+ * left of its TARGET, so all edges into the same target column already share one
+ * x. We only need lanes to separate DISTINCT sources feeding the same column: a
+ * star of edges from one node collapses to a single spine (lane 0), while edges
+ * from different sources into the same column get adjacent channels so they don't
+ * silently merge into one misleading line. This is bus / hyperedge routing: group
+ * by target column, then one lane per source within the column.
  */
 export function assignChannels(arrows: GanttArrow[]): void {
-  const buckets: Record<number, GanttArrow[]> = {};
+  const colKey = (a: GanttArrow): number => Math.round(a.tgtStart * 1000) / 1000;
+  const buckets: Record<string, GanttArrow[]> = {};
   for (const a of arrows) {
-    if (!buckets[a.bucket]) buckets[a.bucket] = [];
-    buckets[a.bucket].push(a);
+    const key = String(colKey(a));
+    (buckets[key] = buckets[key] || []).push(a);
   }
   for (const key of Object.keys(buckets)) {
-    const group = buckets[Number(key)];
-    const span = (a: GanttArrow): [number, number] => [
-      Math.min(a.srcRow, a.tgtRow),
-      Math.max(a.srcRow, a.tgtRow),
-    ];
-    group.sort((a, b) => span(a)[0] - span(b)[0]);
-    const placed: GanttArrow[] = [];
+    const group = buckets[key];
+    // Deterministic ordering so lane numbers are stable across renders.
+    group.sort((a, b) => a.srcRow - b.srcRow || a.source.localeCompare(b.source));
+    const laneBySource: Record<string, number> = {};
+    let next = 0;
     for (const a of group) {
-      const [aTop, aBot] = span(a);
-      const used = new Set<number>();
-      for (const p of placed) {
-        const [pTop, pBot] = span(p);
-        if (aTop <= pBot && pTop <= aBot) used.add(p.lane);
-      }
-      let lane = 0;
-      while (used.has(lane)) lane++;
-      a.lane = lane;
-      placed.push(a);
+      if (!(a.source in laneBySource)) laneBySource[a.source] = next++;
+      a.lane = laneBySource[a.source];
     }
   }
 }

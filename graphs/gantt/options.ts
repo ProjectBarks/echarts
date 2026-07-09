@@ -45,11 +45,11 @@ export interface AssembleGanttArgs {
 
 export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
   const { bars, arrows, rowNames, subtext, formatter } = args;
-  const barData = bars.map((b) => ({ name: b.name, value: [b.start + b.shift, b.end + b.shift, b.row, b.name, b.color] }));
+  const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration] }));
   const arrowData = arrows.map((a) => ({
-    value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0],
+    value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0, a.srcStart],
   }));
-  const maxEnd = Math.max(...bars.map((b) => b.end + b.shift), 1);
+  const maxEnd = Math.max(...bars.map((b) => b.end), 1);
   return {
     backgroundColor: 'transparent',
     title: {
@@ -59,21 +59,27 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
       top: 6,
       subtextStyle: { fontSize: 12, color: COLORS.crit, fontWeight: 500 },
     },
-    grid: { left: 150, right: 44, top: 52, bottom: 34 },
+    grid: { left: 190, right: 48, top: 52, bottom: 40 },
     xAxis: {
       type: 'value',
-      name: 'ms',
-      min: -Math.ceil(maxEnd * 0.035),
-      max: Math.ceil(maxEnd * 1.05),
-      axisLabel: { color: '#aaa', formatter: (v: number) => (v < 0 ? '' : String(v)) },
-      nameTextStyle: { color: '#aaa' },
+      name: 'cumulative time (ms) →',
+      nameLocation: 'end',
+      nameGap: 24,
+      min: -Math.ceil(maxEnd * 0.05),
+      max: Math.ceil(maxEnd * 1.04),
+      // Real-time axis: bar positions are true milliseconds from the earliest-start
+      // schedule, so tick numbers read actual cumulative time. Sub-millisecond bars
+      // stay visible via a pixel-width floor in barRenderItem, not by distorting time.
+      axisLabel: { show: true, color: '#888', formatter: (v: number) => Math.round(v) + '' },
+      axisTick: { show: true },
+      nameTextStyle: { color: '#888' },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } },
     },
     yAxis: {
       type: 'category',
       data: rowNames,
       inverse: true,
-      axisLabel: { color: '#ccc', fontSize: 11 },
+      axisLabel: { color: '#ccc', fontSize: 10, width: 175, overflow: 'truncate' },
       axisTick: { show: false },
       axisLine: { lineStyle: { color: 'rgba(255,255,255,0.15)' } },
       splitArea: { show: true, areaStyle: { color: ['rgba(255,255,255,0.015)', 'rgba(255,255,255,0.045)'] } },
@@ -88,9 +94,9 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
     animationDuration: 600,
     animationEasing: 'cubicOut',
     series: [
-      { type: 'custom', name: 'deps', renderItem: arrowRenderItem, encode: { x: [0, 2], y: [1, 3] }, data: arrowData, silent: true, z: 2 },
+      { type: 'custom', name: 'deps', renderItem: arrowRenderItem, encode: { x: [0, 2], y: [1, 3] }, data: arrowData, silent: true, clip: false, z: 2 },
       { type: 'custom', name: 'tasks', renderItem: barRenderItem, encode: { x: [0, 1], y: 2 }, data: barData, z: 3 },
-      { type: 'custom', name: 'heads', renderItem: arrowHeadRenderItem, encode: { x: [0, 2], y: [1, 3] }, data: arrowData, silent: true, z: 4 },
+      { type: 'custom', name: 'heads', renderItem: arrowHeadRenderItem, encode: { x: [0, 2], y: [1, 3] }, data: arrowData, silent: true, clip: false, z: 4 },
     ],
   } as unknown as EChartsOption;
 }

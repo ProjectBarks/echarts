@@ -33,19 +33,23 @@ describe('Gantt.render', () => {
     expect(r.ms).toBeLessThan(BUDGET_MS);
   });
 
-  test('no two overlapping dependency arrows share a lane within a column', () => {
+  test('arrows sharing a lane within a column share a source (bus spine, not a collision)', () => {
+    // Under source-grouped bus routing, edges into the same target column share a
+    // vertical channel only when they come from the same source (one spine). Two
+    // DIFFERENT sources into the same column must land on different lanes so their
+    // channels do not silently merge into one misleading line.
     const r = summarize(CASES.captured());
-    const arrows = r.option.series[0].data.map((d) => d.value); // [srcEnd, srcRow, tgtStart, tgtRow, lane, isCrit]
+    // value = [srcEnd, srcRow, tgtStart, tgtRow, lane, isCrit, srcStart]
+    const arrows = r.option.series[0].data.map((d) => d.value);
     for (let i = 0; i < arrows.length; i++) {
       for (let j = i + 1; j < arrows.length; j++) {
-        const [, si, ti, ri, li] = arrows[i];
-        const [, sj, tj, rj, lj] = arrows[j];
-        if (li !== lj || ti !== tj) continue;
-        const aTop = Math.min(si, ri);
-        const aBot = Math.max(si, ri);
-        const bTop = Math.min(sj, rj);
-        const bBot = Math.max(sj, rj);
-        expect(aTop <= bBot && bTop <= aBot).toBe(false);
+        const [se_i, sri, ti, , li, , ss_i] = arrows[i];
+        const [se_j, srj, tj, , lj, , ss_j] = arrows[j];
+        if (li !== lj || ti !== tj) continue; // only compare same lane + same column
+        // same lane + same column => must be the same source (same row and span)
+        expect(sri).toBe(srj);
+        expect(se_i).toBe(se_j);
+        expect(ss_i).toBe(ss_j);
       }
     }
   });

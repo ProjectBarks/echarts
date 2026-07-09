@@ -9,11 +9,11 @@ export interface RenderGanttOptions {
 export interface GanttBar {
   name: string;
   row: number;
-  start: number; // true cumulative start (ms), used for tooltip
-  end: number; // true cumulative end (ms), used for tooltip
-  duration: number;
+  parent?: string; // binding predecessor (row order + arrow source share this)
+  start: number; // true cumulative start (ms) from the earliest-start schedule
+  end: number; // true cumulative end (ms) = start + duration
+  duration: number; // exact ms
   depth: number;
-  shift: number; // forward x-offset (ms) so a child never starts on its parent's end
   isCrit: boolean;
   color: string;
 }
@@ -21,9 +21,10 @@ export interface GanttBar {
 export interface GanttArrow {
   source: string;
   target: string;
-  srcEnd: number; // shifted: source bar end + source shift
+  srcStart: number; // source bar start (ms) - used to find the source's mid-bottom
+  srcEnd: number; // source bar end (ms)
   srcRow: number;
-  tgtStart: number; // shifted: target bar start + target shift
+  tgtStart: number; // target bar start (ms)
   tgtRow: number;
   isCrit: boolean;
   bucket: number; // depth of target; arrows into the same column share a channel region
@@ -37,8 +38,10 @@ export interface GanttLayout {
   depth: Record<string, number>;
   cumulLat: NodeLatMap;
   maxCumul: number;
+  critSet: Set<string>; // nodes on the true longest-duration path (rendered chain)
+  critChain: string[]; // that path, ordered root -> last-finishing node
+  critTotal: number; // total duration (ms) of the critical path
   maxDepth: number;
-  gapMs: number; // per-depth-level forward offset
   fwd: AdjMap;
   bwd: AdjMap;
 }
