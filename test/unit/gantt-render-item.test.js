@@ -31,6 +31,10 @@ describe('barRenderItem', () => {
     expect(rect.shape.width).toBe(11); // GANTT.minBarPx floor keeps it visible
     expect(g.children.length).toBe(1); // zero duration -> no label
   });
+  test('applies the opacity channel to the bar rect', () => {
+    const g = barRenderItem({}, mockApi([0, 5, 1, 'x', '#abc', 5, 'ms', 0.1]));
+    expect(g.children[0].style.opacity).toBeCloseTo(0.1 * 0.95, 6);
+  });
 });
 
 describe('arrowRenderItem', () => {

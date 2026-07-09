@@ -47,9 +47,9 @@ export interface AssembleGanttArgs {
 
 export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
   const { bars, arrows, rowNames, subtext, formatter, units } = args;
-  const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration, units] }));
+  const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration, units, 1] }));
   const arrowData = arrows.map((a) => ({
-    value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0, a.srcStart],
+    value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0, a.srcStart, 1],
   }));
   const maxEnd = Math.max(...bars.map((b) => b.end), 1);
   return {

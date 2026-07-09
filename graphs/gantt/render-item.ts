@@ -24,6 +24,8 @@ export function barRenderItem(_params: any, api: any): any {
   const color = api.value(4) as string;
   const durMs = api.value(5) as number;
   const unit = (api.value(6) as string) || '';
+  const op = api.value(7) as number;
+  const opacity = op === undefined ? 1 : op;
   const p0 = api.coord([start, row]);
   const p1 = api.coord([end, row]);
   const h = barThickness(api);
@@ -31,9 +33,9 @@ export function barRenderItem(_params: any, api: any): any {
   const rounded = Math.round(durMs);
   const rx = p0[0] + width;
   const children: any[] = [
-    { type: 'rect', shape: { x: p0[0], y: p0[1] - h / 2, width, height: h, r: 3 }, style: { fill: color, opacity: 0.95 } },
+    { type: 'rect', shape: { x: p0[0], y: p0[1] - h / 2, width, height: h, r: 3 }, style: { fill: color, opacity: 0.95 * opacity } },
   ];
-  if (rounded >= 1) {
+  if (rounded >= 1 && opacity > 0.5) {
     const label = rounded + ' ' + unit;
     const inside = width >= 42;
     children.push(
@@ -117,13 +119,15 @@ function arrowElbow(api: any): Elbow {
 /** Connector line only (rendered behind bars). */
 export function arrowRenderItem(_params: any, api: any): any {
   const isCrit = api.value(5) as number;
+  const op = api.value(7) as number;
+  const a = op === undefined ? 1 : op;
   const e = arrowElbow(api);
   const color = isCrit ? GANTT.critArrow : GANTT.arrow;
   return {
     type: 'polyline',
     z2: isCrit ? 6 : 3,
     shape: { points: e.points },
-    style: { stroke: color, lineWidth: isCrit ? 2 : 1, fill: 'none' },
+    style: { stroke: color, lineWidth: isCrit ? 2 : 1, fill: 'none', opacity: a },
     silent: true,
   };
 }
@@ -131,6 +135,8 @@ export function arrowRenderItem(_params: any, api: any): any {
 /** Arrowhead only (rendered on top of bars). Always points right into the target's start. */
 export function arrowHeadRenderItem(_params: any, api: any): any {
   const isCrit = api.value(5) as number;
+  const op = api.value(7) as number;
+  const a = op === undefined ? 1 : op;
   const e = arrowElbow(api);
   const s = GANTT.arrowHead;
   const color = isCrit ? GANTT.critArrow : GANTT.headMuted;
@@ -138,7 +144,7 @@ export function arrowHeadRenderItem(_params: any, api: any): any {
   return {
     type: 'polygon',
     shape: { points: [[x, y], [x - s, y - s / 1.9], [x - s, y + s / 1.9]] },
-    style: { fill: color },
+    style: { fill: color, opacity: a },
     silent: true,
   };
 }

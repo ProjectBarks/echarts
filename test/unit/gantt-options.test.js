@@ -26,10 +26,10 @@ describe('assembleGanttOption', () => {
   test('bar data carries true ms start/end + duration; arrow data passes through with srcStart', () => {
     const opt = assembleGanttOption({ bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms' });
     const tasks = opt.series.find((s) => s.name === 'tasks');
-    expect(tasks.data[0].value).toEqual([0, 10, 0, 'a', '#f00', 10, 'ms']); // start, end, row, name, color, durationMs, units
-    expect(tasks.data[1].value).toEqual([10, 25, 1, 'b', '#f00', 15, 'ms']);
+    expect(tasks.data[0].value).toEqual([0, 10, 0, 'a', '#f00', 10, 'ms', 1]); // start, end, row, name, color, durationMs, units, opacity
+    expect(tasks.data[1].value).toEqual([10, 25, 1, 'b', '#f00', 15, 'ms', 1]);
     const deps = opt.series.find((s) => s.name === 'deps');
-    expect(deps.data[0].value).toEqual([10, 0, 10, 1, 0, 1, 0]); // srcEnd, srcRow, tgtStart, tgtRow, lane, isCrit, srcStart
+    expect(deps.data[0].value).toEqual([10, 0, 10, 1, 0, 1, 0, 1]); // srcEnd, srcRow, tgtStart, tgtRow, lane, isCrit, srcStart, opacity
   });
 });
 
