@@ -49,3 +49,22 @@ export interface GrafanaContext {
 export type NodeLatMap = Record<string, number>;
 export type EdgeMap = Record<string, number>;      // "src__tgt" -> latency
 export type AdjMap = Record<string, Set<string>>;  // node -> neighbor set
+
+/** A path metric: underscore-joined task chain + its p95 latency. */
+export interface Path {
+  path: string;
+  p95: number;
+}
+
+export interface ParsedData {
+  paths: Path[];
+  taskDurations: NodeLatMap;
+  hasTaskDurations: boolean;
+}
+
+export interface CritInfo {
+  crit: Path;
+  critNodesList: string[];
+  critSet: Set<string>;
+  critTotal: number;
+}
