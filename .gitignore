@@ -3,3 +3,5 @@ npm-debug.log*
 package-lock.json
 dist/
 docs/superpowers/
+CLAUDE.md
+test/gantt-visual/*.png
