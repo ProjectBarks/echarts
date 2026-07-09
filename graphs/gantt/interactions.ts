@@ -1,7 +1,8 @@
 import { ICON } from '../flow-graph/constants.js';
 import { COLORS } from '../common/theme.js';
 import { createEl, showToast } from '../common/dom.js';
-import type { EChartsLike, NodeLatMap } from '../common/types.js';
+import { collectReachable } from '../common/graph.js';
+import type { EChartsLike, NodeLatMap, AdjMap } from '../common/types.js';
 
 // Value-tuple channel indices shared with render-item.ts / options.ts.
 export const BAR_NAME = 3;
@@ -66,6 +67,45 @@ export function rowNameMap(barData: any[]): Map<number, string> {
   const m = new Map<number, string>();
   for (const d of barData) m.set(d.value[2] as number, d.value[3] as string);
   return m;
+}
+
+/** The hovered node plus every recursive ancestor and descendant. */
+export function hoverFamily(name: string, fwd: AdjMap, bwd: AdjMap): Set<string> {
+  const ancestors = new Set<string>();
+  collectReachable(name, bwd, ancestors); // ancestors (+ name)
+  const descendants = new Set<string>();
+  collectReachable(name, fwd, descendants); // descendants (+ name)
+  return new Set([...ancestors, ...descendants]);
+}
+
+export interface GanttHoverCtx {
+  chart: EChartsLike;
+  barData: any[];
+  arrowData: any[];
+  fwd: AdjMap;
+  bwd: AdjMap;
+}
+
+/**
+ * Manual adjacency focus for the Gantt custom series: hovering a bar keeps its
+ * recursive parents and children fully opaque and dims everything else.
+ * Restores on mouseout. No-op when the chart has no event support.
+ */
+export function setupGanttHover(ctx: GanttHoverCtx): void {
+  const { chart, barData, arrowData, fwd, bwd } = ctx;
+  if (!chart.on) return;
+  const rowName = rowNameMap(barData);
+  chart.on('mouseover', (p: any) => {
+    if (!p || p.seriesName !== 'tasks' || !p.value) return;
+    const name = p.value[BAR_NAME] as string;
+    const fam = hoverFamily(name, fwd, bwd);
+    const keepBar = (n: string) => fam.has(n);
+    const keepArrow = (v: any[]) => fam.has(rowName.get(v[ARR_SRC_ROW]) || '') && fam.has(rowName.get(v[ARR_TGT_ROW]) || '');
+    applyDim(chart, barData, arrowData, keepBar, keepArrow);
+  });
+  chart.on('mouseout', () => {
+    resetDim(chart, barData, arrowData);
+  });
 }
 
 // Manual node-type legend as a graphic group (Gantt custom series have no categories).

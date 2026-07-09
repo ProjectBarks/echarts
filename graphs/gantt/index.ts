@@ -11,8 +11,9 @@ import {
 import { computeGanttLayout } from './layout.js';
 import { buildArrows, assignChannels } from './arrows.js';
 import { assembleGanttOption, buildGanttTooltip, buildGanttData } from './options.js';
-import { buildGanttControls } from './interactions.js';
+import { buildGanttControls, setupGanttHover } from './interactions.js';
 import { buildMermaid } from '../flow-graph/mermaid.js';
+import { buildAdjacency } from '../common/graph.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
   const units = (opts.units || '').trim();
@@ -74,6 +75,11 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
         buildMermaid: () => buildMermaid(nodeLat, cleanEdges, layout.critSet, units),
       })
     : { graphic: undefined };
+
+  if (chart && chart.on) {
+    const { fwd, bwd } = buildAdjacency(Object.keys(cleanEdges));
+    setupGanttHover({ chart, barData, arrowData, fwd, bwd });
+  }
 
   return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units, graphic: controls.graphic });
 }
