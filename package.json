@@ -29,6 +29,11 @@
       "types": "./dist/graphs/flow-graph/index.d.ts",
       "import": "./dist/graphs/flow-graph/index.js",
       "default": "./dist/graphs/flow-graph/index.js"
+    },
+    "./gantt": {
+      "types": "./dist/graphs/gantt/index.d.ts",
+      "import": "./dist/graphs/gantt/index.js",
+      "default": "./dist/graphs/gantt/index.js"
     }
   },
   "keywords": [
