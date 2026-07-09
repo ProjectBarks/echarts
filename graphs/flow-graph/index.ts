@@ -10,7 +10,7 @@ import { buildMermaid } from './mermaid.js';
 import { setupSlider, buildGraphicButtons } from './interactions.js';
 import { buildTooltipFormatter, assembleOption } from './options.js';
 
-export function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = {}): EChartsOption {
+function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = {}): EChartsOption {
   const root = opts.root || DEFAULTS.root;
   const sink = opts.sink || DEFAULTS.sink;
   const nodeSpacing = opts.nodeSpacing || DEFAULTS.nodeSpacing;
@@ -98,3 +98,5 @@ export function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOp
     legendData: cats.map((c) => c.name),
   });
 }
+
+export const FlowGraph = { render: renderFlowGraph } as const;

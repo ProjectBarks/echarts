@@ -9,34 +9,34 @@
 // hang itself regresses the render never returns and the run fails on timeout.
 
 import { describe, test, expect } from 'vitest';
-import { renderFlowGraph } from '../graphs/flow-graph/index.js';
+import { FlowGraph } from '../graphs/flow-graph/index.js';
 import { renderSummary } from './helpers/build-context.js';
 import { CASES } from './helpers/cases.js';
 
 const BUDGET_MS = 2000;
 
-describe('renderFlowGraph', () => {
+describe('FlowGraph.render', () => {
   test('renders a clean DAG', () => {
-    const r = renderSummary(renderFlowGraph, CASES.dag());
+    const r = renderSummary(FlowGraph.render, CASES.dag());
     expect(r.nodeCount).toBeGreaterThanOrEqual(3);
     expect(r.drawnLinkCount).toBeGreaterThan(0);
   });
 
   test('terminates on a retry-loop path (repeated token)', () => {
-    const r = renderSummary(renderFlowGraph, CASES.loop());
+    const r = renderSummary(FlowGraph.render, CASES.loop());
     expect(r.nodeCount).toBeGreaterThan(0);
     expect(r.ms).toBeLessThan(BUDGET_MS);
   });
 
   test('keeps both directions of a bidirectional edge', () => {
-    const r = renderSummary(renderFlowGraph, CASES.bidir());
+    const r = renderSummary(FlowGraph.render, CASES.bidir());
     expect(r.drawnEdges).toContain('a->b');
     expect(r.drawnEdges).toContain('b->a');
     expect(r.ms).toBeLessThan(BUDGET_MS);
   });
 
   test('renders the real captured graph (cyclic) and keeps the loop', () => {
-    const r = renderSummary(renderFlowGraph, CASES.captured());
+    const r = renderSummary(FlowGraph.render, CASES.captured());
     expect(r.nodeCount).toBeGreaterThanOrEqual(20);
     // The anonymized retry loop (node4 <-> node16) must still be drawn.
     expect(r.drawnEdges).toContain('node4->node16');
