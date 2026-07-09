@@ -12,7 +12,7 @@
     <div id="chart"></div>
     <script type="module">
       import * as echarts from 'https://esm.sh/echarts@5.6.0';
-      import { renderGantt } from '../../dist/graphs/gantt/index.js';
+      import { Gantt } from '../../dist/graphs/gantt/index.js';
 
       // A branching DAG with per-task durations and a reconverging node, so bars
       // have real widths and dependency arrows overlap in the enrichment column.
@@ -45,7 +45,7 @@
           chart: { getDom: () => container, setOption: (o) => chart.setOption(o) },
         },
       };
-      const option = renderGantt(context, {});
+      const option = Gantt.render(context, {});
       chart.setOption(option);
 
       const bars = (option.series[1].data || []).map((d) => d.value);

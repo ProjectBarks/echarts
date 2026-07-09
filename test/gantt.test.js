@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { renderGantt } from '../graphs/gantt/index.js';
+import { Gantt } from '../graphs/gantt/index.js';
 import { buildContext } from './helpers/build-context.js';
 import { CASES } from './helpers/cases.js';
 
@@ -7,14 +7,14 @@ const BUDGET_MS = 2000;
 
 function summarize(series) {
   const start = performance.now();
-  const option = renderGantt(buildContext(series), {});
+  const option = Gantt.render(buildContext(series), {});
   const ms = performance.now() - start;
   const bars = (option.series && option.series[1] && option.series[1].data) || [];
   const arrows = (option.series && option.series[0] && option.series[0].data) || [];
   return { ms, option, barCount: bars.length, arrowCount: arrows.length };
 }
 
-describe('renderGantt', () => {
+describe('Gantt.render', () => {
   test('renders a bar per task and dependency arrows for a clean DAG', () => {
     const r = summarize(CASES.dag());
     expect(r.barCount).toBeGreaterThanOrEqual(3);
@@ -23,7 +23,7 @@ describe('renderGantt', () => {
   });
 
   test('returns a No data option when there are no paths', () => {
-    const option = renderGantt(buildContext([['solo', 5]]), {});
+    const option = Gantt.render(buildContext([['solo', 5]]), {});
     expect(option.title.text).toBe('No data');
   });
 

@@ -13,7 +13,7 @@ import { computeGanttLayout } from './layout.js';
 import { buildArrows, assignChannels } from './arrows.js';
 import { assembleGanttOption, buildGanttTooltip } from './options.js';
 
-export function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = {}): EChartsOption {
+function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = {}): EChartsOption {
   const root = opts.root || GANTT_DEFAULTS.root;
   const sink = opts.sink || GANTT_DEFAULTS.sink;
   const pctlVar = opts.percentileVar || GANTT_DEFAULTS.percentileVar;
@@ -57,3 +57,5 @@ export function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = 
 
   return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter });
 }
+
+export const Gantt = { render: renderGantt } as const;
