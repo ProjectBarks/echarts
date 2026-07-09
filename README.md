@@ -23,8 +23,8 @@ Grafana's [Business Charts](https://volkovlabs.io/plugins/business-charts/) plug
 Drop in a single import. Each graph in this repo handles the hard computation so your panel code stays one line:
 
 ```js
-import("https://esm.sh/echarts-internal").then(({ renderFlowGraph }) => {
-  context.panel.chart.setOption(renderFlowGraph(context));
+import("https://esm.sh/echarts-internal").then(({ FlowGraph }) => {
+  context.panel.chart.setOption(FlowGraph.render(context));
 });
 ```
 
@@ -34,7 +34,8 @@ import("https://esm.sh/echarts-internal").then(({ renderFlowGraph }) => {
 
 | Graph | Import | Description |
 |-------|--------|-------------|
-| **Flow Graph** | `renderFlowGraph` | DAG node graph with critical path detection, barycenter layout, gradient fills, mermaid export, and latency threshold slider |
+| **Flow Graph** | `FlowGraph.render` | DAG node graph with critical path detection, barycenter layout, gradient fills, mermaid export, and latency threshold slider |
+| **Gantt** | `Gantt.render` | Left-to-right timeline of the same DAG: bars placed by cumulative latency, finish-to-start dependency arrows routed through non-overlapping vertical channels, critical path highlighted |
 
 > More coming — PRs welcome! See [Add a New Graph](#add-a-new-graph) below.
 
@@ -45,16 +46,16 @@ import("https://esm.sh/echarts-internal").then(({ renderFlowGraph }) => {
 ### Via esm.sh (recommended for Grafana)
 
 ```js
-import("https://esm.sh/echarts-internal").then(({ renderFlowGraph }) => {
-  context.panel.chart.setOption(renderFlowGraph(context));
+import("https://esm.sh/echarts-internal").then(({ FlowGraph }) => {
+  context.panel.chart.setOption(FlowGraph.render(context));
 });
 ```
 
 Import a specific graph directly:
 
 ```js
-import("https://esm.sh/echarts-internal/flow-graph").then(({ renderFlowGraph }) => {
-  context.panel.chart.setOption(renderFlowGraph(context));
+import("https://esm.sh/echarts-internal/gantt").then(({ Gantt }) => {
+  context.panel.chart.setOption(Gantt.render(context));
 });
 ```
 
@@ -65,8 +66,8 @@ npm install echarts-internal
 ```
 
 ```js
-import { renderFlowGraph } from "echarts-internal";
-import { renderFlowGraph } from "echarts-internal/flow-graph";
+import { FlowGraph, Gantt } from "echarts-internal";
+import { Gantt } from "echarts-internal/gantt";
 ```
 
 ---
@@ -95,10 +96,10 @@ Turns flat path metrics into an interactive DAG with critical path analysis.
 
 ```js
 // Minimal
-return renderFlowGraph(context);
+return FlowGraph.render(context);
 
 // With options
-return renderFlowGraph(context, {
+return FlowGraph.render(context, {
   root: 'FLOW_START',
   sink: 'setresults',
   nodeSpacing: 52,
@@ -131,20 +132,54 @@ return renderFlowGraph(context, {
 
 ---
 
+## Gantt
+
+Renders the same path-metric DAG as a left-to-right timeline. Reuses the flow graph data pipeline (path parsing, critical path, cumulative latency), then places each task as a bar starting at its cumulative offset and draws finish-to-start dependency arrows through non-overlapping vertical channels.
+
+### Queries
+
+Identical to the Flow Graph: **Query A** underscore-joined path series, optional **Query B** single-token task durations.
+
+### Usage
+
+```js
+// Minimal
+return Gantt.render(context);
+
+// With options
+return Gantt.render(context, {
+  root: 'FLOW_START',
+  sink: 'setresults',
+  percentileVar: '$percentile',
+});
+```
+
+### Options
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `root` | `'FLOW_START'` | Root/source node name |
+| `sink` | `'setresults'` | Sink/terminal node name |
+| `percentileVar` | `'$percentile'` | Grafana variable for percentile |
+
+---
+
 ## Add a New Graph
 
-1. Create `graphs/your-graph/index.ts` exporting a function that takes `(context, options?)` and returns an ECharts option object
-2. Re-export from `index.ts`
+1. Create `graphs/your-graph/index.ts` with a `render(context, options?)` function returning an ECharts option object, exported as a namespace: `export const YourGraph = { render } as const`
+2. Re-export the namespace from `index.ts`
 3. Add an entry to the `exports` map in `package.json`
 4. Document the expected query shape and options in this README
 
 ```js
 // graphs/your-graph/index.ts
-export function renderYourGraph(context: GrafanaContext, opts: Record<string, unknown> = {}) {
+function render(context: GrafanaContext, opts: Record<string, unknown> = {}) {
   const series = context.panel.data?.series || [];
   // ... your computation ...
   return { /* ECharts option */ };
 }
+
+export const YourGraph = { render } as const;
 ```
 
 ---
