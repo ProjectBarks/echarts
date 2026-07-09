@@ -10,7 +10,9 @@ import {
 } from '../common/path-metrics.js';
 import { computeGanttLayout } from './layout.js';
 import { buildArrows, assignChannels } from './arrows.js';
-import { assembleGanttOption, buildGanttTooltip } from './options.js';
+import { assembleGanttOption, buildGanttTooltip, buildGanttData } from './options.js';
+import { buildGanttControls } from './interactions.js';
+import { buildMermaid } from '../flow-graph/mermaid.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
   const units = (opts.units || '').trim();
@@ -59,7 +61,21 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
   const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ' + units + ' p' + pctl + ' — ' + critChain;
   const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl, units });
 
-  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units });
+  const { barData, arrowData } = buildGanttData(layout.bars, arrows, units);
+  const chart = context.panel.chart;
+  const maxLat = Object.keys(nodeLat).reduce((m, k) => Math.max(m, nodeLat[k] || 0), 0);
+  const controls = chart
+    ? buildGanttControls(chart, {
+        barData,
+        arrowData,
+        critSet: layout.critSet,
+        nodeLat,
+        maxLat,
+        buildMermaid: () => buildMermaid(nodeLat, cleanEdges, layout.critSet, units),
+      })
+    : { graphic: undefined };
+
+  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units, graphic: controls.graphic });
 }
 
 export const Gantt = { render: renderGantt } as const;

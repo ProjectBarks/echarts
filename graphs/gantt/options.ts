@@ -43,16 +43,24 @@ export interface AssembleGanttArgs {
   subtext: string;
   formatter: (p: any) => string;
   units: string;
+  graphic?: any[];
 }
 
-export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
-  const { bars, arrows, rowNames, subtext, formatter, units } = args;
+/** Builds the bar/arrow value-tuple data arrays shared by assembleGanttOption and the widget builder. */
+export function buildGanttData(bars: GanttBar[], arrows: GanttArrow[], units: string): { barData: any[]; arrowData: any[] } {
   const barData = bars.map((b) => ({ name: b.name, value: [b.start, b.end, b.row, b.name, b.color, b.duration, units, 1] }));
   const arrowData = arrows.map((a) => ({
     value: [a.srcEnd, a.srcRow, a.tgtStart, a.tgtRow, a.lane, a.isCrit ? 1 : 0, a.srcStart, 1],
   }));
+  return { barData, arrowData };
+}
+
+export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
+  const { bars, arrows, rowNames, subtext, formatter, units, graphic } = args;
+  const { barData, arrowData } = buildGanttData(bars, arrows, units);
   const maxEnd = Math.max(...bars.map((b) => b.end), 1);
   return {
+    graphic,
     backgroundColor: 'transparent',
     title: {
       text: '',
