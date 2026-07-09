@@ -30,6 +30,8 @@ export interface PanelData {
 export interface EChartsLike {
   getDom: () => HTMLElement;
   setOption: (option: unknown) => void;
+  on?: (eventName: string, handler: (params: any) => void) => void;
+  off?: (eventName: string) => void;
 }
 
 export interface PanelContext {
