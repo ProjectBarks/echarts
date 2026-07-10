@@ -11,3 +11,5 @@ test/gantt-visual/real*
 test/gantt-visual/rich.html
 test/gantt-visual/*.network-response
 mockup/
+storybook-static/
+screenshots/
