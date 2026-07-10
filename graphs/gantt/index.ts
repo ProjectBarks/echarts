@@ -15,8 +15,10 @@ import { buildGanttControls, setupGanttHover } from './interactions.js';
 import { buildGanttMermaid } from './mermaid.js';
 import { buildAdjacency } from '../common/graph.js';
 import { pickTheme } from '../common/theme.js';
+import { logVersion } from '../common/version.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
+  logVersion('gantt');
   const theme = pickTheme(opts.theme, context.grafana && context.grafana.theme);
   const units = (opts.units || '').trim();
   if (!units) {

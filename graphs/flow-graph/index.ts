@@ -10,8 +10,10 @@ import { buildMermaid } from './mermaid.js';
 import { setupSlider, buildGraphicButtons } from './interactions.js';
 import { buildTooltipFormatter, assembleOption } from './options.js';
 import { pickTheme } from '../common/theme.js';
+import { logVersion } from '../common/version.js';
 
 function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = { units: '' }): EChartsOption {
+  logVersion('flow-graph');
   const units = (opts.units || '').trim();
   const theme = pickTheme(opts.theme, context.grafana && context.grafana.theme);
   if (!units) {
