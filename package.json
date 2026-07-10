@@ -20,7 +20,8 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "npm run build && storybook build",
-    "test-storybook": "test-storybook"
+    "test-storybook": "test-storybook",
+    "cdn:refresh": "for p in graphs/index.ts graphs/gantt/index.ts graphs/flow-graph/index.ts; do curl -s \"https://esm.sh/gh/ProjectBarks/echarts@main/$p?bundle&refresh\" > /dev/null; done && curl -sI \"https://esm.sh/gh/ProjectBarks/echarts@main/graphs/index.ts?bundle\" | grep -i x-esm-path"
   },
   "exports": {
     ".": {
