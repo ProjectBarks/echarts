@@ -5,6 +5,9 @@
 
 export type ReplaceVariables = (value: string) => string;
 
+import type { GrafanaThemeLike } from './theme.js';
+export type { GrafanaThemeLike };
+
 /** Grafana field value container: a plain array or a Vector-like with toArray(). */
 export interface FieldValues {
   length: number;
@@ -43,7 +46,7 @@ export interface PanelContext {
 }
 
 export interface GrafanaContext {
-  grafana: { replaceVariables?: ReplaceVariables };
+  grafana: { replaceVariables?: ReplaceVariables; theme?: GrafanaThemeLike };
   panel: PanelContext;
 }
 

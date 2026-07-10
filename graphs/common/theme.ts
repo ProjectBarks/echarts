@@ -98,3 +98,28 @@ export function resolveTheme(name: ThemeName = 'auto', win: any = (typeof global
   }
   return THEMES.dark;
 }
+
+// The subset of Grafana's theme object (GrafanaTheme2) that a Business Charts
+// panel exposes via `context.grafana.theme`. Used to auto-match the host theme.
+export interface GrafanaThemeLike {
+  isDark?: boolean;
+  name?: string;
+  colors?: { mode?: string };
+}
+
+/**
+ * Chooses the render theme with this precedence:
+ *  1. an explicit `theme` option ('light' | 'dark' | 'auto') always wins;
+ *  2. otherwise the host Grafana theme when present (isDark, or colors.mode);
+ *  3. otherwise `auto` (prefers-color-scheme, falling back to dark).
+ */
+export function pickTheme(optsTheme?: ThemeName, grafanaTheme?: GrafanaThemeLike, win?: any): ChartTheme {
+  if (optsTheme) return resolveTheme(optsTheme, win);
+  if (grafanaTheme) {
+    if (typeof grafanaTheme.isDark === 'boolean') return grafanaTheme.isDark ? THEMES.dark : THEMES.light;
+    const mode = grafanaTheme.colors && grafanaTheme.colors.mode;
+    if (mode === 'light') return THEMES.light;
+    if (mode === 'dark') return THEMES.dark;
+  }
+  return resolveTheme('auto', win);
+}

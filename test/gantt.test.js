@@ -40,6 +40,16 @@ describe('Gantt.render', () => {
     expect(dark.tooltip.backgroundColor).not.toBe(light.tooltip.backgroundColor);
   });
 
+  test('infers theme from the Grafana context when no theme option is given', () => {
+    const ctxLight = buildContext(CASES.captured());
+    ctxLight.grafana.theme = { isDark: false };
+    const light = Gantt.render(ctxLight, { units: 'ms' });
+    const ctxDark = buildContext(CASES.captured());
+    ctxDark.grafana.theme = { isDark: true };
+    const dark = Gantt.render(ctxDark, { units: 'ms' });
+    expect(light.tooltip.backgroundColor).not.toBe(dark.tooltip.backgroundColor);
+  });
+
   test('terminates on a cyclic captured graph within budget', () => {
     const r = summarize(CASES.captured());
     expect(r.barCount).toBeGreaterThanOrEqual(20);

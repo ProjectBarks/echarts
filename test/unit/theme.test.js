@@ -1,5 +1,22 @@
 import { describe, test, expect } from 'vitest';
-import { resolveTheme, THEMES, COLORS } from '../../graphs/common/theme.js';
+import { resolveTheme, pickTheme, THEMES, COLORS } from '../../graphs/common/theme.js';
+
+describe('pickTheme', () => {
+  test('an explicit option always wins over the Grafana theme', () => {
+    expect(pickTheme('light', { isDark: true })).toBe(THEMES.light);
+    expect(pickTheme('dark', { isDark: false })).toBe(THEMES.dark);
+  });
+  test('infers from the Grafana theme (isDark, then colors.mode) when no option is given', () => {
+    expect(pickTheme(undefined, { isDark: true })).toBe(THEMES.dark);
+    expect(pickTheme(undefined, { isDark: false })).toBe(THEMES.light);
+    expect(pickTheme(undefined, { colors: { mode: 'light' } })).toBe(THEMES.light);
+    expect(pickTheme(undefined, { colors: { mode: 'dark' } })).toBe(THEMES.dark);
+  });
+  test('falls back to auto (dark without matchMedia) when nothing is provided', () => {
+    expect(pickTheme(undefined, undefined, {})).toBe(THEMES.dark);
+    expect(pickTheme(undefined, undefined, { matchMedia: () => ({ matches: false }) })).toBe(THEMES.light);
+  });
+});
 
 describe('resolveTheme', () => {
   test('defaults to auto and maps explicit names to presets', () => {

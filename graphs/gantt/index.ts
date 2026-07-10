@@ -14,10 +14,10 @@ import { assembleGanttOption, buildGanttTooltip, buildGanttData } from './option
 import { buildGanttControls, setupGanttHover } from './interactions.js';
 import { buildGanttMermaid } from './mermaid.js';
 import { buildAdjacency } from '../common/graph.js';
-import { resolveTheme } from '../common/theme.js';
+import { pickTheme } from '../common/theme.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
-  const theme = resolveTheme(opts.theme);
+  const theme = pickTheme(opts.theme, context.grafana && context.grafana.theme);
   const units = (opts.units || '').trim();
   if (!units) {
     return {

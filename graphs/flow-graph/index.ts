@@ -9,11 +9,11 @@ import { buildLinks, buildTransitiveHoverEdges } from './links.js';
 import { buildMermaid } from './mermaid.js';
 import { setupSlider, buildGraphicButtons } from './interactions.js';
 import { buildTooltipFormatter, assembleOption } from './options.js';
-import { resolveTheme } from '../common/theme.js';
+import { pickTheme } from '../common/theme.js';
 
 function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions = { units: '' }): EChartsOption {
   const units = (opts.units || '').trim();
-  const theme = resolveTheme(opts.theme);
+  const theme = pickTheme(opts.theme, context.grafana && context.grafana.theme);
   if (!units) {
     return {
       title: { text: 'Set the "units" option to render this chart', left: 'center', top: 'center', textStyle: { color: theme.alertText } },
