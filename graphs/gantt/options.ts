@@ -69,7 +69,7 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
       top: 6,
       subtextStyle: { fontSize: 12, color: COLORS.crit, fontWeight: 500 },
     },
-    grid: { left: 190, right: 48, top: 52, bottom: 40 },
+    grid: { left: 190, right: 48, top: 52, bottom: 68 },
     xAxis: {
       type: 'value',
       name: 'time (' + units + ') →',

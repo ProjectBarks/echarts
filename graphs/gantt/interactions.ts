@@ -116,13 +116,15 @@ export function buildGanttLegend(): any {
     { c: COLORS.dp, t: 'Data provider' },
     { c: COLORS.meta, t: 'Flow start/sink' },
   ];
+  // Horizontal legend centered under the plot area (see the grid bottom offset).
   const children: any[] = [];
-  rows.forEach((r, i) => {
-    const y = i * 16;
-    children.push({ type: 'rect', shape: { x: 0, y, width: 10, height: 10, r: 2 }, style: { fill: r.c } });
-    children.push({ type: 'text', style: { x: 15, y: y + 5, text: r.t, fill: '#aaa', fontSize: 10, textVerticalAlign: 'middle' } });
-  });
-  return { type: 'group', right: 10, top: 8, z: 100, children };
+  let x = 0;
+  for (const r of rows) {
+    children.push({ type: 'rect', shape: { x, y: 0, width: 10, height: 10, r: 2 }, style: { fill: r.c } });
+    children.push({ type: 'text', style: { x: x + 15, y: 5, text: r.t, fill: '#aaa', fontSize: 10, textVerticalAlign: 'middle' } });
+    x += 15 + r.t.length * 6.2 + 20; // advance past the swatch, label, and a gap
+  }
+  return { type: 'group', left: 'center', bottom: 8, z: 100, children };
 }
 
 function iconButton(rightOffset: number, glyph: string, glyphColor: string, glyphSize: number, onclick: () => void): any {

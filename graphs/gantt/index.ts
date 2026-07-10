@@ -12,7 +12,7 @@ import { computeGanttLayout } from './layout.js';
 import { buildArrows, assignChannels } from './arrows.js';
 import { assembleGanttOption, buildGanttTooltip, buildGanttData } from './options.js';
 import { buildGanttControls, setupGanttHover } from './interactions.js';
-import { buildMermaid } from '../flow-graph/mermaid.js';
+import { buildGanttMermaid } from './mermaid.js';
 import { buildAdjacency } from '../common/graph.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
@@ -72,7 +72,7 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
         critSet: layout.critSet,
         nodeLat,
         maxLat,
-        buildMermaid: () => buildMermaid(nodeLat, cleanEdges, layout.critSet, units),
+        buildMermaid: () => buildGanttMermaid(layout.bars, units),
       })
     : { graphic: undefined };
 
