@@ -1,0 +1,58 @@
+name: Storybook Pages
+
+on:
+  push:
+    branches: [main]
+
+# Allow the deploy job to publish to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One Pages deploy at a time; a newer push supersedes an in-flight run.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - run: npm install --no-audit --no-fund
+      - name: Build static Storybook
+        run: npm run build-storybook
+      - name: Capture story screenshots
+        run: |
+          npx playwright install --with-deps chromium
+          npx http-server storybook-static -p 6006 --silent &
+          npx wait-on http://127.0.0.1:6006
+          npm run test-storybook -- --url http://127.0.0.1:6006 --ci
+        continue-on-error: true
+      - name: Upload screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: storybook-static
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

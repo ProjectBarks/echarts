@@ -14,6 +14,14 @@
 
 ---
 
+## Live component gallery
+
+Every graph is rendered in Storybook from anonymized fixtures and published from `main` by CI:
+
+**https://projectbarks.github.io/echarts/**
+
+Each push to `main` rebuilds the gallery and captures a screenshot per story (downloadable as the `story-screenshots` CI artifact) so graph regressions are caught visually.
+
 ## The Problem
 
 Grafana's [Business Charts](https://volkovlabs.io/plugins/business-charts/) plugin gives you raw ECharts — but building a polished, interactive visualization means writing hundreds of lines of layout logic, color scales, interactive filtering, and edge-crossing minimization inside a tiny code editor.
