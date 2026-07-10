@@ -14,6 +14,7 @@ import { assembleGanttOption, buildGanttTooltip, buildGanttData } from './option
 import { buildGanttControls, setupGanttHover } from './interactions.js';
 import { buildGanttMermaid } from './mermaid.js';
 import { buildAdjacency } from '../common/graph.js';
+import { resolveTheme } from '../common/theme.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
   const units = (opts.units || '').trim();
@@ -60,7 +61,8 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
   const rowNames = layout.bars.map((b) => b.name);
   const critChain = layout.critChain.join(' → ');
   const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ' + units + ' p' + pctl + ' — ' + critChain;
-  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl, units });
+  const theme = resolveTheme();
+  const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl, units, theme });
 
   const { barData, arrowData } = buildGanttData(layout.bars, arrows, units);
   const chart = context.panel.chart;
@@ -81,7 +83,7 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
     setupGanttHover({ chart, barData, arrowData, fwd, bwd });
   }
 
-  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units, graphic: controls.graphic });
+  return assembleGanttOption({ bars: layout.bars, arrows, rowNames, subtext, formatter, units, graphic: controls.graphic, theme });
 }
 
 export const Gantt = { render: renderGantt } as const;

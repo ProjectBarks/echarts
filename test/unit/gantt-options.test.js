@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { assembleGanttOption, buildGanttTooltip } from '../../graphs/gantt/options.js';
+import { THEMES } from '../../graphs/common/theme.js';
 
 const bars = [
   { name: 'a', row: 0, start: 0, end: 10, duration: 10, depth: 0, isCrit: true, color: '#f00' },
@@ -11,7 +12,7 @@ const arrows = [
 
 describe('assembleGanttOption', () => {
   test('produces a value x-axis with visible time labels, banded category y-axis, and three custom layers', () => {
-    const opt = assembleGanttOption({ bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms' });
+    const opt = assembleGanttOption({ bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms', theme: THEMES.dark });
     expect(opt.xAxis.type).toBe('value');
     expect(opt.xAxis.min).toBeLessThan(0); // left gutter for arrowheads at t=0
     expect(opt.xAxis.axisLabel.show).toBe(true); // real-time ms axis is labeled
@@ -24,7 +25,7 @@ describe('assembleGanttOption', () => {
     expect(opt.series.map((s) => s.name)).toEqual(['deps', 'tasks', 'heads']);
   });
   test('bar data carries true ms start/end + duration; arrow data passes through with srcStart', () => {
-    const opt = assembleGanttOption({ bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms' });
+    const opt = assembleGanttOption({ bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms', theme: THEMES.dark });
     const tasks = opt.series.find((s) => s.name === 'tasks');
     expect(tasks.data[0].value).toEqual([0, 10, 0, 'a', '#f00', 10, 'ms', 1]); // start, end, row, name, color, durationMs, units, opacity
     expect(tasks.data[1].value).toEqual([10, 25, 1, 'b', '#f00', 15, 'ms', 1]);
@@ -35,9 +36,22 @@ describe('assembleGanttOption', () => {
 
 describe('buildGanttTooltip', () => {
   test('reports true duration and start/end for a bar', () => {
-    const fmt = buildGanttTooltip({ barByName: { a: bars[0] }, critTotal: 25, pctl: '95', units: 'ms' });
+    const fmt = buildGanttTooltip({ barByName: { a: bars[0] }, critTotal: 25, pctl: '95', units: 'ms', theme: THEMES.dark });
     const html = fmt({ name: 'a' });
     expect(html).toContain('a');
     expect(html).toContain('10');
+  });
+});
+
+describe('theme tokens', () => {
+  test('theme tokens flow into the option chrome', () => {
+    const base = { bars, arrows, rowNames: ['a', 'b'], subtext: 's', formatter: () => '', units: 'ms' };
+    const optD = assembleGanttOption({ ...base, theme: THEMES.dark });
+    const optL = assembleGanttOption({ ...base, theme: THEMES.light });
+    expect(optD.tooltip.backgroundColor).toBe(THEMES.dark.tooltipBg);
+    expect(optL.tooltip.backgroundColor).toBe(THEMES.light.tooltipBg);
+    expect(optL.xAxis.axisLabel.color).toBe(THEMES.light.textFaint);
+    expect(optL.yAxis.axisLabel.color).toBe(THEMES.light.textMuted);
+    expect(optL.title.textStyle.color).toBe(THEMES.light.text);
   });
 });
