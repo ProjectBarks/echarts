@@ -87,9 +87,10 @@ export const THEMES: { dark: ChartTheme; light: ChartTheme } = {
 
 export type ThemeName = 'light' | 'dark' | 'auto';
 
-// Resolves a theme name to its token set. `auto` uses prefers-color-scheme when
-// a matchMedia-capable object is available (browser), else falls back to dark.
-export function resolveTheme(name: ThemeName = 'dark', win: any = (typeof globalThis !== 'undefined' ? globalThis : undefined)): ChartTheme {
+// Resolves a theme name to its token set. `auto` (the default) uses
+// prefers-color-scheme when a matchMedia-capable object is available (browser),
+// else falls back to dark.
+export function resolveTheme(name: ThemeName = 'auto', win: any = (typeof globalThis !== 'undefined' ? globalThis : undefined)): ChartTheme {
   if (name === 'light') return THEMES.light;
   if (name === 'auto') {
     const mm = win && typeof win.matchMedia === 'function' ? win.matchMedia('(prefers-color-scheme: dark)') : null;

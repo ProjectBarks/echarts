@@ -3,7 +3,7 @@ import type { ThemeName } from '../common/theme.js';
 
 export interface RenderGanttOptions {
   units: string; // required: axis/label/tooltip unit suffix (e.g. 'ms'); alert shown if blank
-  theme?: ThemeName; // 'light' | 'dark' | 'auto'; defaults to 'dark'
+  theme?: ThemeName; // 'light' | 'dark' | 'auto'; defaults to 'auto' (follows prefers-color-scheme, else dark)
   root?: string;
   sink?: string;
   percentileVar?: string;

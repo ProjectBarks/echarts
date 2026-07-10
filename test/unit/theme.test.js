@@ -2,8 +2,10 @@ import { describe, test, expect } from 'vitest';
 import { resolveTheme, THEMES, COLORS } from '../../graphs/common/theme.js';
 
 describe('resolveTheme', () => {
-  test('defaults to dark and maps names to presets', () => {
-    expect(resolveTheme()).toBe(THEMES.dark);
+  test('defaults to auto and maps explicit names to presets', () => {
+    // default name is 'auto': resolves via prefers-color-scheme, falling back to dark
+    expect(resolveTheme(undefined, { matchMedia: () => ({ matches: false }) })).toBe(THEMES.light);
+    expect(resolveTheme(undefined, {})).toBe(THEMES.dark);
     expect(resolveTheme('dark')).toBe(THEMES.dark);
     expect(resolveTheme('light')).toBe(THEMES.light);
   });
