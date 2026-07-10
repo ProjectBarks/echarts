@@ -9,10 +9,12 @@ export default {
 };
 
 // Anonymized capture 201: the DAG view of the same compact flow.
-export const Panel201 = () => renderChart(FlowGraph.render, anon201, { units: 'ms' });
+export const Panel201Dark = () => renderChart(FlowGraph.render, anon201, { units: 'ms', theme: 'dark' });
+export const Panel201Light = () => renderChart(FlowGraph.render, anon201, { units: 'ms', theme: 'light' });
 
 // Anonymized capture 200: the large flow, barycenter-laid-out.
-export const Panel200 = () => renderChart(FlowGraph.render, anon200, { units: 'ms' });
+export const Panel200Dark = () => renderChart(FlowGraph.render, anon200, { units: 'ms', theme: 'dark' });
+export const Panel200Light = () => renderChart(FlowGraph.render, anon200, { units: 'ms', theme: 'light' });
 
 // Guardrail: rendering without the required `units` option shows the alert.
 export const MissingUnits = () => renderChart(FlowGraph.render, anon201, {});

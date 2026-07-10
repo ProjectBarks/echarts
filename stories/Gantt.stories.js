@@ -9,10 +9,12 @@ export default {
 };
 
 // Anonymized capture 201: a compact flow with a clear critical path.
-export const Panel201 = () => renderChart(Gantt.render, anon201, { units: 'ms' });
+export const Panel201Dark = () => renderChart(Gantt.render, anon201, { units: 'ms', theme: 'dark' });
+export const Panel201Light = () => renderChart(Gantt.render, anon201, { units: 'ms', theme: 'light' });
 
 // Anonymized capture 200: a large flow that stresses connector routing.
-export const Panel200 = () => renderChart(Gantt.render, anon200, { units: 'ms' });
+export const Panel200Dark = () => renderChart(Gantt.render, anon200, { units: 'ms', theme: 'dark' });
+export const Panel200Light = () => renderChart(Gantt.render, anon200, { units: 'ms', theme: 'light' });
 
 // Guardrail: rendering without the required `units` option shows the alert.
 export const MissingUnits = () => renderChart(Gantt.render, anon201, {});

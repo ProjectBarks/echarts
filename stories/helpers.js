@@ -12,6 +12,9 @@ export function renderChart(renderFn, series, opts) {
   const el = document.createElement('div');
   el.style.width = width + 'px';
   el.style.height = height + 'px';
+  // The chart root is transparent, so the story paints the surrounding surface
+  // to match the requested theme (this is what a Grafana light/dark panel does).
+  el.style.background = opts && opts.theme === 'light' ? '#ffffff' : '#14161c';
 
   // echarts.init needs explicit dimensions because the element is not yet laid
   // out when Storybook calls the story function.
