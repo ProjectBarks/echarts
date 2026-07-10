@@ -34,6 +34,12 @@ describe('Gantt.render', () => {
     expect(r2.option.title.text).toBe('Set the "units" option to render this chart');
   });
 
+  test('theme option flows to the tooltip background', () => {
+    const dark = summarize(CASES.captured(), { units: 'ms', theme: 'dark' }).option;
+    const light = summarize(CASES.captured(), { units: 'ms', theme: 'light' }).option;
+    expect(dark.tooltip.backgroundColor).not.toBe(light.tooltip.backgroundColor);
+  });
+
   test('terminates on a cyclic captured graph within budget', () => {
     const r = summarize(CASES.captured());
     expect(r.barCount).toBeGreaterThanOrEqual(20);

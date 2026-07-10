@@ -17,10 +17,11 @@ import { buildAdjacency } from '../common/graph.js';
 import { resolveTheme } from '../common/theme.js';
 
 function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units: '' }): EChartsOption {
+  const theme = resolveTheme(opts.theme);
   const units = (opts.units || '').trim();
   if (!units) {
     return {
-      title: { text: 'Set the "units" option to render this chart', left: 'center', top: 'center', textStyle: { color: '#ccc' } },
+      title: { text: 'Set the "units" option to render this chart', left: 'center', top: 'center', textStyle: { color: theme.alertText } },
     } as unknown as EChartsOption;
   }
 
@@ -38,7 +39,7 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
   const parsed = parseSeries(seriesList, root);
   if (!parsed.paths.length) {
     return {
-      title: { text: 'No data', left: 'center', top: 'center', textStyle: { color: '#ccc' } },
+      title: { text: 'No data', left: 'center', top: 'center', textStyle: { color: theme.alertText } },
     } as unknown as EChartsOption;
   }
 
@@ -61,7 +62,6 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
   const rowNames = layout.bars.map((b) => b.name);
   const critChain = layout.critChain.join(' → ');
   const subtext = 'Critical path ≤ ' + Math.round(layout.critTotal) + ' ' + units + ' p' + pctl + ' — ' + critChain;
-  const theme = resolveTheme();
   const formatter = buildGanttTooltip({ barByName: layout.barByName, critTotal: layout.critTotal, pctl, units, theme });
 
   const { barData, arrowData } = buildGanttData(layout.bars, arrows, units);

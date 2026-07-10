@@ -1,7 +1,9 @@
 import type { NodeLatMap, AdjMap } from '../common/types.js';
+import type { ThemeName } from '../common/theme.js';
 
 export interface RenderGanttOptions {
   units: string; // required: axis/label/tooltip unit suffix (e.g. 'ms'); alert shown if blank
+  theme?: ThemeName; // 'light' | 'dark' | 'auto'; defaults to 'dark'
   root?: string;
   sink?: string;
   percentileVar?: string;
