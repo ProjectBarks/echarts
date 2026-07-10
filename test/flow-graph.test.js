@@ -50,4 +50,10 @@ describe('FlowGraph.render', () => {
     const option2 = FlowGraph.render(buildContext(CASES.dag()), { units: '  ' });
     expect(option2.title.text).toBe('Set the "units" option to render this chart');
   });
+
+  test('theme option flows to the tooltip background', () => {
+    const dark = FlowGraph.render(buildContext(CASES.captured()), { units: 'ms', theme: 'dark' });
+    const light = FlowGraph.render(buildContext(CASES.captured()), { units: 'ms', theme: 'light' });
+    expect(dark.tooltip.backgroundColor).not.toBe(light.tooltip.backgroundColor);
+  });
 });

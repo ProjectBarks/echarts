@@ -1,4 +1,5 @@
 import type { NodeLatMap } from '../common/types.js';
+import type { ThemeName } from '../common/theme.js';
 
 export type { Path, ParsedData, CritInfo } from '../common/types.js';
 
@@ -9,6 +10,7 @@ export interface RenderFlowGraphOptions {
   nodeSpacing?: number;
   nodeSize?: number;
   percentileVar?: string;
+  theme?: ThemeName;
 }
 
 export interface Position {

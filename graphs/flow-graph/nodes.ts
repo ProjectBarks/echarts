@@ -2,6 +2,7 @@ import type { GraphSeriesOption } from 'echarts/types/dist/shared';
 import { COLORS } from './constants.js';
 import type { NodeLatMap } from '../common/types.js';
 import type { Position } from './types.js';
+import type { ChartTheme } from '../common/theme.js';
 
 type GraphNode = NonNullable<GraphSeriesOption['data']>[number];
 
@@ -29,10 +30,11 @@ export interface BuildNodesCtx {
   root: string;
   sink: string;
   units: string;
+  theme: ChartTheme;
 }
 
 export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[] {
-  const { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink, units } = ctx;
+  const { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink, units, theme } = ctx;
   return Object.entries(nodeLat)
     .sort((a, b) => b[1] - a[1])
     .map(([name, lat]) => {
@@ -62,8 +64,8 @@ export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[]
             colorStops: [
               { offset: 0, color: col },
               { offset: Math.min(pct, 0.99), color: col },
-              { offset: Math.min(pct + 0.005, 1.0), color: COLORS.dark },
-              { offset: 1, color: COLORS.dark },
+              { offset: Math.min(pct + 0.005, 1.0), color: theme.nodeEmpty },
+              { offset: 1, color: theme.nodeEmpty },
             ],
           },
           borderColor: col,
@@ -76,13 +78,13 @@ export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[]
           fontSize: 10,
           position: 'right',
           distance: 8,
-          color: '#ddd',
+          color: theme.textMuted,
           formatter: () => {
             const ms = lat > 0 ? '  {val| ' + Math.round(lat) + ' ' + units + '}' : '';
             return '{name|' + displayName + '}' + ms;
           },
           rich: {
-            name: { fontSize: 10, color: '#ddd' },
+            name: { fontSize: 10, color: theme.textMuted },
             val: { fontSize: 10, fontWeight: 'bold', color: col, padding: [0, 0, 0, 4] },
           },
         },

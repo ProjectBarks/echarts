@@ -1,6 +1,7 @@
 import type { EChartsLike, NodeLatMap } from '../common/types.js';
 import { showToast, createEl } from '../common/dom.js';
 import { ICON } from './constants.js';
+import type { ChartTheme } from '../common/theme.js';
 
 export interface SliderCtx {
   fullNodes: any[];
@@ -10,10 +11,11 @@ export interface SliderCtx {
   critSet: Set<string>;
   root: string;
   sink: string;
+  theme: ChartTheme;
 }
 
 export function setupSlider(chart: EChartsLike, ctx: SliderCtx): HTMLElement | null {
-  const { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink } = ctx;
+  const { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink, theme } = ctx;
   const container = chart.getDom();
   if (container.querySelector('.lat-slider')) return null;
   const wrap = createEl('div', {
@@ -24,13 +26,13 @@ export function setupSlider(chart: EChartsLike, ctx: SliderCtx): HTMLElement | n
     display: 'none',
     alignItems: 'center',
     gap: '6px',
-    background: 'rgba(30,33,40,0.95)',
+    background: theme.popoverBg,
     padding: '6px 10px',
     borderRadius: '6px',
-    border: '1px solid rgba(150,150,160,0.3)',
+    border: '1px solid ' + theme.popoverBorder,
   });
   wrap.className = 'lat-slider';
-  const label = createEl('span', { color: '#999', fontSize: '10px', whiteSpace: 'nowrap' });
+  const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
   label.textContent = 'Min: 0%';
   const slider = createEl('input', { width: '100px', accentColor: '#ffa94d', cursor: 'pointer' });
   slider.type = 'range';
@@ -75,10 +77,11 @@ export interface GraphicCtx {
   fullLinks: any[];
   critOnlyNodes: any[];
   critOnlyLinks: any[];
+  theme: ChartTheme;
 }
 
 export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] {
-  const { buildMermaid, sliderPopover, fullNodes, fullLinks, critOnlyNodes, critOnlyLinks } = ctx;
+  const { buildMermaid, sliderPopover, fullNodes, fullLinks, critOnlyNodes, critOnlyLinks, theme } = ctx;
   const icoS = ICON.size;
   const icoGap = ICON.gap;
   const container = chart.getDom();
@@ -97,12 +100,12 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
         {
           type: 'rect',
           shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: 'rgba(60,63,70,0.9)', stroke: 'rgba(150,150,160,0.4)', lineWidth: 1 },
+          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
           z2: 1,
         },
         {
           type: 'text',
-          style: { text: '📋', x: icoS / 2, y: icoS / 2, fill: '#aaa', fontSize: 12, textAlign: 'center', textVerticalAlign: 'middle' },
+          style: { text: '📋', x: icoS / 2, y: icoS / 2, fill: theme.buttonGlyph, fontSize: 12, textAlign: 'center', textVerticalAlign: 'middle' },
           z2: 2,
         },
       ],
@@ -122,7 +125,7 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
         {
           type: 'rect',
           shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: 'rgba(60,63,70,0.9)', stroke: 'rgba(150,150,160,0.4)', lineWidth: 1 },
+          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
           z2: 1,
         },
         {
@@ -144,7 +147,7 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
         {
           type: 'rect',
           shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: 'rgba(60,63,70,0.9)', stroke: 'rgba(150,150,160,0.4)', lineWidth: 1 },
+          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
           z2: 1,
         },
         {

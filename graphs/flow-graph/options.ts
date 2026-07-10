@@ -1,5 +1,6 @@
 import type { EChartsOption, GraphSeriesOption } from 'echarts/types/dist/shared';
 import type { NodeLatMap } from '../common/types.js';
+import type { ChartTheme } from '../common/theme.js';
 
 type GraphNode = NonNullable<GraphSeriesOption['data']>[number];
 type GraphLink = NonNullable<GraphSeriesOption['links']>[number];
@@ -14,10 +15,11 @@ export interface TooltipCtx {
   root: string;
   sink: string;
   units: string;
+  theme: ChartTheme;
 }
 
 export function buildTooltipFormatter(ctx: TooltipCtx): (p: any) => string {
-  const { nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink, units } = ctx;
+  const { nodeLat, cumulLat, critSet, critTotal, pctl, hasTaskDurations, root, sink, units, theme } = ctx;
   return (p: any) => {
     if (p.dataType === 'edge') {
       return '<b>' + p.data.source + ' → ' + p.data.target + '</b><br/>' + p.data.value + ' ' + units;
@@ -39,7 +41,7 @@ export function buildTooltipFormatter(ctx: TooltipCtx): (p: any) => string {
       '<b style="font-size:13px">' +
       name +
       '</b>' +
-      '<br/><span style="color:#888">' +
+      '<br/><span style="color:' + theme.textFaint + '">' +
       role +
       '</span>' +
       '<br/><br/>p' +
@@ -51,7 +53,7 @@ export function buildTooltipFormatter(ctx: TooltipCtx): (p: any) => string {
       '<br/><b>' +
       Math.round(cumul) +
       ' ' + units + '</b>' +
-      (hasTaskDurations ? '<br/><span style="color:#666">Source: task.duration histogram</span>' : '')
+      (hasTaskDurations ? '<br/><span style="color:' + theme.textFaint + '">Source: task.duration histogram</span>' : '')
     );
   };
 }
@@ -65,10 +67,11 @@ export interface AssembleArgs {
   critColor: string;
   formatter: (p: any) => string;
   legendData: string[];
+  theme: ChartTheme;
 }
 
 export function assembleOption(args: AssembleArgs): EChartsOption {
-  const { nodes, links, cats, graphic, subtext, critColor, formatter, legendData } = args;
+  const { nodes, links, cats, graphic, subtext, critColor, formatter, legendData, theme } = args;
   return {
     backgroundColor: 'transparent',
     title: {
@@ -76,22 +79,22 @@ export function assembleOption(args: AssembleArgs): EChartsOption {
       subtext,
       left: 'center',
       top: 4,
-      textStyle: { fontSize: 15, color: '#eee', fontWeight: 600 },
+      textStyle: { fontSize: 15, color: theme.text, fontWeight: 600 },
       subtextStyle: { fontSize: 11, color: critColor, fontWeight: 500 },
     },
     graphic,
     tooltip: {
       confine: true,
-      backgroundColor: 'rgba(20,22,28,0.95)',
-      borderColor: 'rgba(255,255,255,0.1)',
-      textStyle: { color: '#ddd', fontSize: 12 },
+      backgroundColor: theme.tooltipBg,
+      borderColor: theme.tooltipBorder,
+      textStyle: { color: theme.tooltipText, fontSize: 12 },
       formatter,
     },
     legend: {
       data: legendData,
       bottom: 4,
       left: 'center',
-      textStyle: { color: '#aaa', fontSize: 10 },
+      textStyle: { color: theme.textMuted, fontSize: 10 },
       itemWidth: 14,
       itemHeight: 14,
       itemGap: 20,
@@ -108,7 +111,7 @@ export function assembleOption(args: AssembleArgs): EChartsOption {
         roam: true,
         emphasis: {
           focus: 'adjacency',
-          itemStyle: { borderWidth: 4, borderColor: '#fff' },
+          itemStyle: { borderWidth: 4, borderColor: theme.emphasisBorder },
           lineStyle: { width: 3.5 },
           label: { fontSize: 11, fontWeight: 'bold', color: '#fff' },
         },
