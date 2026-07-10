@@ -3,6 +3,7 @@ import { COLORS } from '../common/theme.js';
 import { createEl, showToast } from '../common/dom.js';
 import { collectReachable } from '../common/graph.js';
 import type { EChartsLike, NodeLatMap, AdjMap } from '../common/types.js';
+import type { ChartTheme } from '../common/theme.js';
 
 // Value-tuple channel indices shared with render-item.ts / options.ts.
 export const BAR_NAME = 3;
@@ -60,6 +61,7 @@ export interface GanttControlsCtx {
   nodeLat: NodeLatMap;
   maxLat: number;
   buildMermaid: () => string;
+  theme: ChartTheme;
 }
 
 // Maps a row index to its task name, for arrow endpoint filtering.
@@ -109,7 +111,7 @@ export function setupGanttHover(ctx: GanttHoverCtx): void {
 }
 
 // Manual node-type legend as a graphic group (Gantt custom series have no categories).
-export function buildGanttLegend(): any {
+export function buildGanttLegend(theme: ChartTheme): any {
   const rows = [
     { c: COLORS.crit, t: 'Critical' },
     { c: COLORS.gate, t: 'Gate' },
@@ -121,17 +123,17 @@ export function buildGanttLegend(): any {
   let x = 0;
   for (const r of rows) {
     children.push({ type: 'rect', shape: { x, y: 0, width: 10, height: 10, r: 2 }, style: { fill: r.c } });
-    children.push({ type: 'text', style: { x: x + 15, y: 5, text: r.t, fill: '#aaa', fontSize: 10, textVerticalAlign: 'middle' } });
+    children.push({ type: 'text', style: { x: x + 15, y: 5, text: r.t, fill: theme.textMuted, fontSize: 10, textVerticalAlign: 'middle' } });
     x += 15 + r.t.length * 6.2 + 20; // advance past the swatch, label, and a gap
   }
   return { type: 'group', left: 'center', bottom: 8, z: 100, children };
 }
 
-function iconButton(rightOffset: number, glyph: string, glyphColor: string, glyphSize: number, onclick: () => void): any {
+function iconButton(theme: ChartTheme, rightOffset: number, glyph: string, glyphColor: string, glyphSize: number, onclick: () => void): any {
   return {
     type: 'group', right: rightOffset, bottom: 8, z: 100, onclick,
     children: [
-      { type: 'rect', shape: { width: ICON.size, height: ICON.size, r: 4 }, style: { fill: 'rgba(60,63,70,0.9)', stroke: 'rgba(150,150,160,0.4)', lineWidth: 1 }, z2: 1 },
+      { type: 'rect', shape: { width: ICON.size, height: ICON.size, r: 4 }, style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 }, z2: 1 },
       { type: 'text', style: { text: glyph, x: ICON.size / 2, y: ICON.size / 2, fill: glyphColor, fontSize: glyphSize, textAlign: 'center', textVerticalAlign: 'middle' }, z2: 2 },
     ],
   };
@@ -139,12 +141,12 @@ function iconButton(rightOffset: number, glyph: string, glyphColor: string, glyp
 
 // Range-input popover for the min-% duration filter. Returns the element (hidden until toggled).
 export function setupGanttSlider(chart: EChartsLike, ctx: GanttControlsCtx): HTMLElement | null {
-  const { barData, arrowData, critSet, nodeLat, maxLat } = ctx;
+  const { barData, arrowData, critSet, nodeLat, maxLat, theme } = ctx;
   const container = chart.getDom();
   if (container.querySelector('.gantt-lat-slider')) return null;
-  const wrap = createEl('div', { position: 'absolute', bottom: '36px', right: '8px', zIndex: '9999', display: 'none', alignItems: 'center', gap: '6px', background: 'rgba(30,33,40,0.95)', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(150,150,160,0.3)' });
+  const wrap = createEl('div', { position: 'absolute', bottom: '36px', right: '8px', zIndex: '9999', display: 'none', alignItems: 'center', gap: '6px', background: theme.popoverBg, padding: '6px 10px', borderRadius: '6px', border: '1px solid ' + theme.popoverBorder });
   wrap.className = 'gantt-lat-slider';
-  const label = createEl('span', { color: '#999', fontSize: '10px', whiteSpace: 'nowrap' });
+  const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
   label.textContent = 'Min: 0%';
   const slider = createEl('input', { width: '100px', accentColor: '#ffa94d', cursor: 'pointer' });
   slider.type = 'range'; slider.min = '0'; slider.max = '50'; slider.value = '0';
@@ -171,16 +173,16 @@ export interface GanttControls {
 
 // Builds the full corner-widget set + legend. Mirrors flow-graph buildGraphicButtons.
 export function buildGanttControls(chart: EChartsLike, ctx: GanttControlsCtx): GanttControls {
-  const { barData, arrowData, critSet, buildMermaid } = ctx;
+  const { barData, arrowData, critSet, buildMermaid, theme } = ctx;
   const container = chart.getDom();
   const rowName = rowNameMap(barData);
   const sliderPopover = setupGanttSlider(chart, ctx);
   let critOnly = false;
-  const copyGroup = iconButton(ICON.size * 2 + ICON.gap * 2 + 8, '📋', '#aaa', 12, () => {
+  const copyGroup = iconButton(theme, ICON.size * 2 + ICON.gap * 2 + 8, '📋', theme.buttonGlyph, 12, () => {
     navigator.clipboard.writeText(buildMermaid());
     showToast(container, 'Mermaid copied');
   });
-  const critOnlyGroup = iconButton(ICON.size + ICON.gap + 8, '⚡', '#ff6b6b', 13, () => {
+  const critOnlyGroup = iconButton(theme, ICON.size + ICON.gap + 8, '⚡', '#ff6b6b', 13, () => {
     critOnly = !critOnly;
     if (critOnly) {
       const keepArrow = (v: any[]) => critSet.has(rowName.get(v[1]) || '') && critSet.has(rowName.get(v[3]) || '');
@@ -189,8 +191,8 @@ export function buildGanttControls(chart: EChartsLike, ctx: GanttControlsCtx): G
       resetDim(chart, barData, arrowData);
     }
   });
-  const sliderGroup = iconButton(8, '◔', '#ffa94d', 14, () => {
+  const sliderGroup = iconButton(theme, 8, '◔', '#ffa94d', 14, () => {
     if (sliderPopover) sliderPopover.style.display = sliderPopover.style.display === 'none' ? 'flex' : 'none';
   });
-  return { graphic: [buildGanttLegend(), copyGroup, critOnlyGroup, sliderGroup], sliderPopover, copyGroup, critOnlyGroup, sliderGroup };
+  return { graphic: [buildGanttLegend(theme), copyGroup, critOnlyGroup, sliderGroup], sliderPopover, copyGroup, critOnlyGroup, sliderGroup };
 }

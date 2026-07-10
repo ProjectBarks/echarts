@@ -75,6 +75,7 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
         nodeLat,
         maxLat,
         buildMermaid: () => buildGanttMermaid(layout.bars, units),
+        theme,
       })
     : { graphic: undefined };
 

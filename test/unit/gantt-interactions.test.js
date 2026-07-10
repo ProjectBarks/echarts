@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { withBarOpacity, withArrowOpacity, applyDim } from '../../graphs/gantt/interactions.js';
+import { THEMES } from '../../graphs/common/theme.js';
 
 test('withBarOpacity dims bars whose name is not kept', () => {
   const data = [ { name: 'a', value: [0,1,0,'a','#f00',1,'ms',1] }, { name: 'b', value: [0,1,1,'b','#fa0',1,'ms',1] } ];
@@ -26,11 +27,16 @@ test('applyDim setOption carries dimmed data into all three series', () => {
 import { buildGanttControls, buildGanttLegend, rowNameMap } from '../../graphs/gantt/interactions.js';
 
 test('legend lists the four node types', () => {
-  const g = JSON.stringify(buildGanttLegend());
+  const g = JSON.stringify(buildGanttLegend(THEMES.dark));
   expect(g).toContain('Critical');
   expect(g).toContain('Gate');
   expect(g).toContain('Data provider');
   expect(g).toContain('Flow start/sink');
+});
+
+test('legend text uses the theme muted color', () => {
+  const g = JSON.stringify(buildGanttLegend(THEMES.light));
+  expect(g).toContain(THEMES.light.textMuted);
 });
 
 test('copy button copies mermaid text and crit-only dims non-critical bars', () => {
@@ -42,7 +48,7 @@ test('copy button copies mermaid text and crit-only dims non-critical bars', () 
   let copied = '';
   const orig = navigator.clipboard;
   Object.defineProperty(navigator, 'clipboard', { value: { writeText: (t) => { copied = t; return Promise.resolve(); } }, configurable: true });
-  const ctrl = buildGanttControls(chart, { barData, arrowData, critSet: new Set(['c']), nodeLat: { c:1, x:1 }, maxLat: 1, buildMermaid: () => 'flowchart LR' });
+  const ctrl = buildGanttControls(chart, { barData, arrowData, critSet: new Set(['c']), nodeLat: { c:1, x:1 }, maxLat: 1, buildMermaid: () => 'flowchart LR', theme: THEMES.dark });
   ctrl.copyGroup.onclick();
   expect(copied).toBe('flowchart LR');
   ctrl.critOnlyGroup.onclick();
@@ -63,7 +69,7 @@ test('min-% slider dims bars below the duration threshold', () => {
   const chart = { getDom: () => container, setOption: (o) => calls.push(o) };
   const barData = [ { name: 'big', value: [0,10,0,'big','#f00',10,'ms',1] }, { name: 'small', value: [0,1,1,'small','#fa0',1,'ms',1] } ];
   const arrowData = [];
-  buildGanttControls(chart, { barData, arrowData, critSet: new Set(), nodeLat: { big:10, small:1 }, maxLat: 10, buildMermaid: () => '' });
+  buildGanttControls(chart, { barData, arrowData, critSet: new Set(), nodeLat: { big:10, small:1 }, maxLat: 10, buildMermaid: () => '', theme: THEMES.dark });
   const slider = container.querySelector('.gantt-lat-slider input');
   slider.value = '30'; // threshold = 3ms
   slider.dispatchEvent(new Event('input'));
