@@ -1,4 +1,5 @@
 import { GANTT } from './constants.js';
+import type { ChartTheme } from '../common/theme.js';
 
 /** Pixel height of one category row, used to scale bars to the available space. */
 function bandHeight(api: any): number {
@@ -17,36 +18,38 @@ function barThickness(api: any): number {
  * Bar series. Positions are true milliseconds (value 0/1 = start/end); a pixel
  * floor keeps sub-millisecond bars visible. Label shows exact ms duration.
  */
-export function barRenderItem(_params: any, api: any): any {
-  const start = api.value(0) as number;
-  const end = api.value(1) as number;
-  const row = api.value(2) as number;
-  const color = api.value(4) as string;
-  const durMs = api.value(5) as number;
-  const unit = (api.value(6) as string) || '';
-  const op = api.value(7) as number;
-  const opacity = op === undefined ? 1 : op;
-  const p0 = api.coord([start, row]);
-  const p1 = api.coord([end, row]);
-  const h = barThickness(api);
-  const width = Math.max(p1[0] - p0[0], GANTT.minBarPx);
-  const rounded = Math.round(durMs);
-  const rx = p0[0] + width;
-  const children: any[] = [
-    { type: 'rect', shape: { x: p0[0], y: p0[1] - h / 2, width, height: h, r: 3 }, style: { fill: color, opacity: 0.95 * opacity } },
-  ];
-  if (rounded >= 1 && opacity > 0.5) {
-    const label = rounded + ' ' + unit;
-    const inside = width >= 42;
-    children.push(
-      inside
-        ? { type: 'text', style: { x: rx - 7, y: p0[1], text: label, fill: 'rgba(0,0,0,0.72)', fontSize: 10, fontWeight: 'bold', textAlign: 'right', textVerticalAlign: 'middle' } }
-        // Outside label sits past the source's exit stub so the connector leaving
-        // the bar's front never draws through the text.
-        : { type: 'text', style: { x: rx + GANTT.exitPx + 8, y: p0[1], text: label, fill: '#8b909a', fontSize: 9, textAlign: 'left', textVerticalAlign: 'middle' } },
-    );
-  }
-  return { type: 'group', z2: 10, children };
+export function barRenderItem(theme: ChartTheme) {
+  return function (_params: any, api: any): any {
+    const start = api.value(0) as number;
+    const end = api.value(1) as number;
+    const row = api.value(2) as number;
+    const color = api.value(4) as string;
+    const durMs = api.value(5) as number;
+    const unit = (api.value(6) as string) || '';
+    const op = api.value(7) as number;
+    const opacity = op === undefined ? 1 : op;
+    const p0 = api.coord([start, row]);
+    const p1 = api.coord([end, row]);
+    const h = barThickness(api);
+    const width = Math.max(p1[0] - p0[0], GANTT.minBarPx);
+    const rounded = Math.round(durMs);
+    const rx = p0[0] + width;
+    const children: any[] = [
+      { type: 'rect', shape: { x: p0[0], y: p0[1] - h / 2, width, height: h, r: 3 }, style: { fill: color, opacity: 0.95 * opacity } },
+    ];
+    if (rounded >= 1 && opacity > 0.5) {
+      const label = rounded + ' ' + unit;
+      const inside = width >= 42;
+      children.push(
+        inside
+          ? { type: 'text', style: { x: rx - 7, y: p0[1], text: label, fill: theme.barLabelInside, fontSize: 10, fontWeight: 'bold', textAlign: 'right', textVerticalAlign: 'middle' } }
+          // Outside label sits past the source's exit stub so the connector leaving
+          // the bar's front never draws through the text.
+          : { type: 'text', style: { x: rx + GANTT.exitPx + 8, y: p0[1], text: label, fill: theme.barLabelOutside, fontSize: 9, textAlign: 'left', textVerticalAlign: 'middle' } },
+      );
+    }
+    return { type: 'group', z2: 10, children };
+  };
 }
 
 interface Elbow {
@@ -117,34 +120,38 @@ function arrowElbow(api: any): Elbow {
 }
 
 /** Connector line only (rendered behind bars). */
-export function arrowRenderItem(_params: any, api: any): any {
-  const isCrit = api.value(5) as number;
-  const op = api.value(7) as number;
-  const a = op === undefined ? 1 : op;
-  const e = arrowElbow(api);
-  const color = isCrit ? GANTT.critArrow : GANTT.arrow;
-  return {
-    type: 'polyline',
-    z2: isCrit ? 6 : 3,
-    shape: { points: e.points },
-    style: { stroke: color, lineWidth: isCrit ? 2 : 1, fill: 'none', opacity: a },
-    silent: true,
+export function arrowRenderItem(theme: ChartTheme) {
+  return function (_params: any, api: any): any {
+    const isCrit = api.value(5) as number;
+    const op = api.value(7) as number;
+    const a = op === undefined ? 1 : op;
+    const e = arrowElbow(api);
+    const color = isCrit ? GANTT.critArrow : theme.arrow;
+    return {
+      type: 'polyline',
+      z2: isCrit ? 6 : 3,
+      shape: { points: e.points },
+      style: { stroke: color, lineWidth: isCrit ? 2 : 1, fill: 'none', opacity: a },
+      silent: true,
+    };
   };
 }
 
 /** Arrowhead only (rendered on top of bars). Always points right into the target's start. */
-export function arrowHeadRenderItem(_params: any, api: any): any {
-  const isCrit = api.value(5) as number;
-  const op = api.value(7) as number;
-  const a = op === undefined ? 1 : op;
-  const e = arrowElbow(api);
-  const s = GANTT.arrowHead;
-  const color = isCrit ? GANTT.critArrow : GANTT.headMuted;
-  const [x, y] = e.head;
-  return {
-    type: 'polygon',
-    shape: { points: [[x, y], [x - s, y - s / 1.9], [x - s, y + s / 1.9]] },
-    style: { fill: color, opacity: a },
-    silent: true,
+export function arrowHeadRenderItem(theme: ChartTheme) {
+  return function (_params: any, api: any): any {
+    const isCrit = api.value(5) as number;
+    const op = api.value(7) as number;
+    const a = op === undefined ? 1 : op;
+    const e = arrowElbow(api);
+    const s = GANTT.arrowHead;
+    const color = isCrit ? GANTT.critArrow : theme.arrowHead;
+    const [x, y] = e.head;
+    return {
+      type: 'polygon',
+      shape: { points: [[x, y], [x - s, y - s / 1.9], [x - s, y + s / 1.9]] },
+      style: { fill: color, opacity: a },
+      silent: true,
+    };
   };
 }
