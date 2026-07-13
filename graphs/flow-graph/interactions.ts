@@ -1,6 +1,6 @@
 import type { EChartsLike, NodeLatMap } from '../common/types.js';
-import { showToast, createEl } from '../common/dom.js';
-import { ICON } from './constants.js';
+import { showToast } from '../common/dom.js';
+import { iconButton, buttonOffset, togglePopover, createRangeFilterPopover } from '../common/controls.js';
 import type { ChartTheme } from '../common/theme.js';
 
 export interface SliderCtx {
@@ -16,33 +16,9 @@ export interface SliderCtx {
 
 export function setupSlider(chart: EChartsLike, ctx: SliderCtx): HTMLElement | null {
   const { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink, theme } = ctx;
-  const container = chart.getDom();
-  if (container.querySelector('.lat-slider')) return null;
-  const wrap = createEl('div', {
-    position: 'absolute',
-    bottom: '36px',
-    right: '8px',
-    zIndex: '9999',
-    display: 'none',
-    alignItems: 'center',
-    gap: '6px',
-    background: theme.popoverBg,
-    padding: '6px 10px',
-    borderRadius: '6px',
-    border: '1px solid ' + theme.popoverBorder,
-  });
-  wrap.className = 'lat-slider';
-  const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
-  label.textContent = 'Min: 0%';
-  const slider = createEl('input', { width: '100px', accentColor: theme.dp, cursor: 'pointer' });
-  slider.type = 'range';
-  slider.min = '0';
-  slider.max = '50';
-  slider.value = '0';
-  slider.addEventListener('input', () => {
-    const pctVal = parseInt(slider.value) / 100;
-    const threshold = pctVal * maxLat;
-    label.textContent = 'Min: ' + slider.value + '%';
+  return createRangeFilterPopover(chart, theme, 'lat-slider', (pct, setLabel) => {
+    const threshold = (pct / 100) * maxLat;
+    setLabel('Min: ' + pct + '%');
     const keepSet = new Set<string>();
     for (const n of fullNodes) {
       const l = nodeLat[n.name] || 0;
@@ -63,11 +39,6 @@ export function setupSlider(chart: EChartsLike, ctx: SliderCtx): HTMLElement | n
     );
     chart.setOption({ series: [{ data: filtered, links: filteredLinks }] });
   });
-  wrap.appendChild(label);
-  wrap.appendChild(slider);
-  container.style.position = 'relative';
-  container.appendChild(wrap);
-  return wrap;
 }
 
 export interface GraphicCtx {
@@ -82,80 +53,37 @@ export interface GraphicCtx {
 
 export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] {
   const { buildMermaid, sliderPopover, fullNodes, fullLinks, critOnlyNodes, critOnlyLinks, theme } = ctx;
-  const icoS = ICON.size;
-  const icoGap = ICON.gap;
   const container = chart.getDom();
   let critOnly = false;
   return [
-    {
-      type: 'group',
-      right: icoS * 2 + icoGap * 2 + 8,
-      bottom: 8,
-      z: 100,
-      onclick: function () {
+    iconButton(theme, {
+      right: buttonOffset(2),
+      glyph: '📋',
+      glyphColor: theme.buttonGlyph,
+      glyphSize: 12,
+      onclick: () => {
         navigator.clipboard.writeText(buildMermaid());
         showToast(container, 'Mermaid copied', theme);
       },
-      children: [
-        {
-          type: 'rect',
-          shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
-          z2: 1,
-        },
-        {
-          type: 'text',
-          style: { text: '📋', x: icoS / 2, y: icoS / 2, fill: theme.buttonGlyph, fontSize: 12, textAlign: 'center', textVerticalAlign: 'middle' },
-          z2: 2,
-        },
-      ],
-    },
-    {
-      type: 'group',
-      right: icoS + icoGap + 8,
-      bottom: 8,
-      z: 100,
-      onclick: function () {
+    }),
+    iconButton(theme, {
+      right: buttonOffset(1),
+      glyph: '⚡',
+      glyphColor: theme.crit,
+      glyphSize: 13,
+      onclick: () => {
         critOnly = !critOnly;
         chart.setOption({
           series: [{ data: critOnly ? critOnlyNodes : fullNodes, links: critOnly ? critOnlyLinks : fullLinks }],
         });
       },
-      children: [
-        {
-          type: 'rect',
-          shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
-          z2: 1,
-        },
-        {
-          type: 'text',
-          style: { text: '⚡', x: icoS / 2, y: icoS / 2, fill: theme.crit, fontSize: 13, textAlign: 'center', textVerticalAlign: 'middle' },
-          z2: 2,
-        },
-      ],
-    },
-    {
-      type: 'group',
-      right: 8,
-      bottom: 8,
-      z: 100,
-      onclick: function () {
-        if (sliderPopover) sliderPopover.style.display = sliderPopover.style.display === 'none' ? 'flex' : 'none';
-      },
-      children: [
-        {
-          type: 'rect',
-          shape: { width: icoS, height: icoS, r: 4 },
-          style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 },
-          z2: 1,
-        },
-        {
-          type: 'text',
-          style: { text: '◔', x: icoS / 2, y: icoS / 2, fill: theme.dp, fontSize: 14, textAlign: 'center', textVerticalAlign: 'middle' },
-          z2: 2,
-        },
-      ],
-    },
+    }),
+    iconButton(theme, {
+      right: buttonOffset(0),
+      glyph: '◔',
+      glyphColor: theme.dp,
+      glyphSize: 14,
+      onclick: () => togglePopover(sliderPopover),
+    }),
   ];
 }

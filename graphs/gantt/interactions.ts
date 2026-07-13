@@ -1,6 +1,6 @@
-import { ICON } from '../common/constants.js';
-import { createEl, showToast } from '../common/dom.js';
+import { showToast } from '../common/dom.js';
 import { collectReachable } from '../common/graph.js';
+import { iconButton, buttonOffset, togglePopover, createRangeFilterPopover } from '../common/controls.js';
 import type { EChartsLike, NodeLatMap, AdjMap } from '../common/types.js';
 import type { ChartTheme } from '../common/theme.js';
 
@@ -128,38 +128,17 @@ export function buildGanttLegend(theme: ChartTheme): any {
   return { type: 'group', left: 'center', bottom: 8, z: 100, children };
 }
 
-function iconButton(theme: ChartTheme, rightOffset: number, glyph: string, glyphColor: string, glyphSize: number, onclick: () => void): any {
-  return {
-    type: 'group', right: rightOffset, bottom: 8, z: 100, onclick,
-    children: [
-      { type: 'rect', shape: { width: ICON.size, height: ICON.size, r: 4 }, style: { fill: theme.buttonBg, stroke: theme.buttonStroke, lineWidth: 1 }, z2: 1 },
-      { type: 'text', style: { text: glyph, x: ICON.size / 2, y: ICON.size / 2, fill: glyphColor, fontSize: glyphSize, textAlign: 'center', textVerticalAlign: 'middle' }, z2: 2 },
-    ],
-  };
-}
-
 // Range-input popover for the min-% duration filter. Returns the element (hidden until toggled).
 export function setupGanttSlider(chart: EChartsLike, ctx: GanttControlsCtx): HTMLElement | null {
   const { barData, arrowData, critSet, nodeLat, maxLat, theme } = ctx;
-  const container = chart.getDom();
-  if (container.querySelector('.gantt-lat-slider')) return null;
-  const wrap = createEl('div', { position: 'absolute', bottom: '36px', right: '8px', zIndex: '9999', display: 'none', alignItems: 'center', gap: '6px', background: theme.popoverBg, padding: '6px 10px', borderRadius: '6px', border: '1px solid ' + theme.popoverBorder });
-  wrap.className = 'gantt-lat-slider';
-  const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
-  label.textContent = 'Min: 0%';
-  const slider = createEl('input', { width: '100px', accentColor: theme.dp, cursor: 'pointer' });
-  slider.type = 'range'; slider.min = '0'; slider.max = '50'; slider.value = '0';
   const rowName = rowNameMap(barData);
-  slider.addEventListener('input', () => {
-    const threshold = (parseInt(slider.value) / 100) * maxLat;
-    label.textContent = 'Min: ' + slider.value + '%';
+  return createRangeFilterPopover(chart, theme, 'gantt-lat-slider', (pct, setLabel) => {
+    const threshold = (pct / 100) * maxLat;
+    setLabel('Min: ' + pct + '%');
     const keepBar = (n: string) => critSet.has(n) || (nodeLat[n] || 0) >= threshold;
     const keepArrow = (v: any[]) => keepBar(rowName.get(v[1]) || '') && keepBar(rowName.get(v[3]) || '');
     applyDim(chart, barData, arrowData, keepBar, keepArrow);
   });
-  wrap.appendChild(label); wrap.appendChild(slider);
-  container.style.position = 'relative'; container.appendChild(wrap);
-  return wrap;
 }
 
 export interface GanttControls {
@@ -177,21 +156,37 @@ export function buildGanttControls(chart: EChartsLike, ctx: GanttControlsCtx): G
   const rowName = rowNameMap(barData);
   const sliderPopover = setupGanttSlider(chart, ctx);
   let critOnly = false;
-  const copyGroup = iconButton(theme, ICON.size * 2 + ICON.gap * 2 + 8, '📋', theme.buttonGlyph, 12, () => {
-    navigator.clipboard.writeText(buildMermaid());
-    showToast(container, 'Mermaid copied', theme);
+  const copyGroup = iconButton(theme, {
+    right: buttonOffset(2),
+    glyph: '📋',
+    glyphColor: theme.buttonGlyph,
+    glyphSize: 12,
+    onclick: () => {
+      navigator.clipboard.writeText(buildMermaid());
+      showToast(container, 'Mermaid copied', theme);
+    },
   });
-  const critOnlyGroup = iconButton(theme, ICON.size + ICON.gap + 8, '⚡', theme.crit, 13, () => {
-    critOnly = !critOnly;
-    if (critOnly) {
-      const keepArrow = (v: any[]) => critSet.has(rowName.get(v[1]) || '') && critSet.has(rowName.get(v[3]) || '');
-      applyDim(chart, barData, arrowData, (n) => critSet.has(n), keepArrow);
-    } else {
-      resetDim(chart, barData, arrowData);
-    }
+  const critOnlyGroup = iconButton(theme, {
+    right: buttonOffset(1),
+    glyph: '⚡',
+    glyphColor: theme.crit,
+    glyphSize: 13,
+    onclick: () => {
+      critOnly = !critOnly;
+      if (critOnly) {
+        const keepArrow = (v: any[]) => critSet.has(rowName.get(v[1]) || '') && critSet.has(rowName.get(v[3]) || '');
+        applyDim(chart, barData, arrowData, (n) => critSet.has(n), keepArrow);
+      } else {
+        resetDim(chart, barData, arrowData);
+      }
+    },
   });
-  const sliderGroup = iconButton(theme, 8, '◔', theme.dp, 14, () => {
-    if (sliderPopover) sliderPopover.style.display = sliderPopover.style.display === 'none' ? 'flex' : 'none';
+  const sliderGroup = iconButton(theme, {
+    right: buttonOffset(0),
+    glyph: '◔',
+    glyphColor: theme.dp,
+    glyphSize: 14,
+    onclick: () => togglePopover(sliderPopover),
   });
   return { graphic: [buildGanttLegend(theme), copyGroup, critOnlyGroup, sliderGroup], sliderPopover, copyGroup, critOnlyGroup, sliderGroup };
 }
