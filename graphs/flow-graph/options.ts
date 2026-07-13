@@ -1,5 +1,6 @@
 import type { EChartsOption, GraphSeriesOption } from 'echarts/types/dist/shared';
 import type { NodeLatMap } from '../common/types.js';
+import { themedTooltip } from '../common/chart-options.js';
 import type { ChartTheme } from '../common/theme.js';
 
 type GraphNode = NonNullable<GraphSeriesOption['data']>[number];
@@ -83,13 +84,7 @@ export function assembleOption(args: AssembleArgs): EChartsOption {
       subtextStyle: { fontSize: 11, color: critColor, fontWeight: 500 },
     },
     graphic,
-    tooltip: {
-      confine: true,
-      backgroundColor: theme.tooltipBg,
-      borderColor: theme.tooltipBorder,
-      textStyle: { color: theme.tooltipText, fontSize: 12 },
-      formatter,
-    },
+    tooltip: themedTooltip(theme, formatter),
     legend: {
       data: legendData,
       bottom: 4,

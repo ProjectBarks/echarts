@@ -1,5 +1,6 @@
 import type { EChartsOption } from 'echarts/types/dist/shared';
 import { barRenderItem, arrowRenderItem, arrowHeadRenderItem } from './render-item.js';
+import { themedTooltip } from '../common/chart-options.js';
 import type { ChartTheme } from '../common/theme.js';
 import type { GanttBar, GanttArrow } from './types.js';
 
@@ -97,13 +98,7 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
       axisLine: { lineStyle: { color: theme.axisLine } },
       splitArea: { show: true, areaStyle: { color: [theme.bandA, theme.bandB] } },
     },
-    tooltip: {
-      confine: true,
-      backgroundColor: theme.tooltipBg,
-      borderColor: theme.tooltipBorder,
-      textStyle: { color: theme.tooltipText, fontSize: 12 },
-      formatter,
-    },
+    tooltip: themedTooltip(theme, formatter),
     animationDuration: 600,
     animationEasing: 'cubicOut',
     series: [
