@@ -1,5 +1,7 @@
 // Semantic accent palette. These vivid hues read on both light and dark
-// backgrounds and are intentionally theme-independent.
+// backgrounds. They are the DEFAULT accents; when a Grafana theme is present its
+// semantic colors (error/warning/info/success) override them via pickTheme, so
+// charts match the host brand. Kept here as the zero-config fallback.
 export const COLORS = {
   crit: '#ff6b6b',
   dp: '#ffa94d',
@@ -8,8 +10,15 @@ export const COLORS = {
   dark: 'rgba(30,33,40,0.85)', // legacy alias; prefer ChartTheme.nodeEmpty
 } as const;
 
-// Theme-dependent "chrome" colors (everything that is NOT a semantic accent).
+// Theme-dependent colors. Semantic accents (crit/dp/gate/meta) plus chrome.
+// Geometry lives in constants, never here: this interface is colors only.
 export interface ChartTheme {
+  // Semantic accents (default from COLORS; overridden by the Grafana theme).
+  crit: string;
+  dp: string;
+  gate: string;
+  meta: string;
+  // Chrome.
   text: string;
   textMuted: string;
   textFaint: string;
@@ -32,10 +41,24 @@ export interface ChartTheme {
   barLabelInside: string;
   barLabelOutside: string;
   emphasisBorder: string;
+  emphasisLabel: string; // label text on an emphasized/hovered node
+  linkMuted: string;     // non-critical flow-graph edge
+  successBg: string;     // toast background
+  successText: string;   // toast text
+  transparent: string;   // fully transparent fill (invisible hover edges)
 }
+
+const ACCENTS = { crit: COLORS.crit, dp: COLORS.dp, gate: COLORS.gate, meta: COLORS.meta };
+const SHARED = {
+  emphasisLabel: '#fff',
+  successBg: 'rgba(40,167,69,0.9)',
+  successText: '#fff',
+  transparent: 'rgba(0,0,0,0)',
+};
 
 export const THEMES: { dark: ChartTheme; light: ChartTheme } = {
   dark: {
+    ...ACCENTS,
     text: '#eee',
     textMuted: '#bbb',
     textFaint: '#888',
@@ -58,8 +81,11 @@ export const THEMES: { dark: ChartTheme; light: ChartTheme } = {
     barLabelInside: 'rgba(0,0,0,0.72)',
     barLabelOutside: '#8b909a',
     emphasisBorder: '#fff',
+    linkMuted: 'rgba(150,150,160,0.35)',
+    ...SHARED,
   },
   light: {
+    ...ACCENTS,
     text: '#1a1c22',
     textMuted: '#555',
     textFaint: '#777',
@@ -82,10 +108,37 @@ export const THEMES: { dark: ChartTheme; light: ChartTheme } = {
     barLabelInside: 'rgba(0,0,0,0.72)',
     barLabelOutside: '#666',
     emphasisBorder: '#333',
+    linkMuted: 'rgba(150,150,160,0.35)',
+    ...SHARED,
   },
 };
 
 export type ThemeName = 'light' | 'dark' | 'auto';
+
+/**
+ * Returns `color` at the given alpha as an rgba() string. Accepts #rgb, #rrggbb,
+ * rgb(), and rgba() inputs (Grafana colors may be any of these), so accent tints
+ * can be derived from a single source color instead of hardcoding each variant.
+ */
+export function withAlpha(color: string, alpha: number): string {
+  const c = color.trim();
+  const short = /^#([0-9a-fA-F]{3})$/.exec(c);
+  if (short) {
+    const [r, g, b] = short[1].split('').map((h) => parseInt(h + h, 16));
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  const long = /^#([0-9a-fA-F]{6})$/.exec(c);
+  if (long) {
+    const n = parseInt(long[1], 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+  }
+  const rgb = /^rgba?\(([^)]+)\)$/.exec(c);
+  if (rgb) {
+    const [r, g, b] = rgb[1].split(',').map((s) => s.trim());
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  return c;
+}
 
 // Resolves a theme name to its token set. `auto` (the default) uses
 // prefers-color-scheme when a matchMedia-capable object is available (browser),
@@ -99,21 +152,49 @@ export function resolveTheme(name: ThemeName = 'auto', win: any = (typeof global
   return THEMES.dark;
 }
 
+// A Grafana color entry is either a hex/rgb string or a { main } object.
+type GrafanaColorLike = string | { main?: string } | undefined;
+
 // The subset of Grafana's theme object (GrafanaTheme2) that a Business Charts
-// panel exposes via `context.grafana.theme`. Used to auto-match the host theme.
+// panel exposes via `context.grafana.theme`. Used to auto-match the host theme
+// (light/dark) and its semantic accent colors.
 export interface GrafanaThemeLike {
   isDark?: boolean;
   name?: string;
-  colors?: { mode?: string };
+  colors?: {
+    mode?: string;
+    error?: GrafanaColorLike;
+    warning?: GrafanaColorLike;
+    info?: GrafanaColorLike;
+    success?: GrafanaColorLike;
+    primary?: GrafanaColorLike;
+  };
 }
 
-/**
- * Chooses the render theme with this precedence:
- *  1. an explicit `theme` option ('light' | 'dark' | 'auto') always wins;
- *  2. otherwise the host Grafana theme when present (isDark, or colors.mode);
- *  3. otherwise `auto` (prefers-color-scheme, falling back to dark).
- */
-export function pickTheme(optsTheme?: ThemeName, grafanaTheme?: GrafanaThemeLike, win?: any): ChartTheme {
+function colorValue(c: GrafanaColorLike): string | undefined {
+  if (!c) return undefined;
+  if (typeof c === 'string') return c;
+  return typeof c.main === 'string' ? c.main : undefined;
+}
+
+/** Maps Grafana semantic colors onto chart accents; empty when none are present. */
+function grafanaAccents(g: GrafanaThemeLike): Partial<ChartTheme> {
+  const c = g.colors;
+  if (!c) return {};
+  const out: Partial<ChartTheme> = {};
+  const crit = colorValue(c.error);
+  const dp = colorValue(c.warning);
+  const gate = colorValue(c.info) || colorValue(c.primary);
+  const meta = colorValue(c.success);
+  if (crit) out.crit = crit;
+  if (dp) out.dp = dp;
+  if (gate) out.gate = gate;
+  if (meta) out.meta = meta;
+  return out;
+}
+
+// Picks the light/dark chrome preset (mode only).
+function pickBase(optsTheme?: ThemeName, grafanaTheme?: GrafanaThemeLike, win?: any): ChartTheme {
   if (optsTheme) return resolveTheme(optsTheme, win);
   if (grafanaTheme) {
     if (typeof grafanaTheme.isDark === 'boolean') return grafanaTheme.isDark ? THEMES.dark : THEMES.light;
@@ -122,4 +203,20 @@ export function pickTheme(optsTheme?: ThemeName, grafanaTheme?: GrafanaThemeLike
     if (mode === 'dark') return THEMES.dark;
   }
   return resolveTheme('auto', win);
+}
+
+/**
+ * Chooses the render theme:
+ *  1. mode (light/dark chrome) — explicit `theme` option wins, else the host
+ *     Grafana mode (isDark / colors.mode), else `auto` (prefers-color-scheme);
+ *  2. accents — overlaid from the Grafana theme's semantic colors when present,
+ *     otherwise the default COLORS palette.
+ * Returns the shared preset object unchanged (identity) when no Grafana accents
+ * apply, so callers can rely on reference equality for the presets.
+ */
+export function pickTheme(optsTheme?: ThemeName, grafanaTheme?: GrafanaThemeLike, win?: any): ChartTheme {
+  const base = pickBase(optsTheme, grafanaTheme, win);
+  if (!grafanaTheme) return base;
+  const accents = grafanaAccents(grafanaTheme);
+  return Object.keys(accents).length ? { ...base, ...accents } : base;
 }

@@ -56,6 +56,7 @@ function renderGantt(context: GrafanaContext, opts: RenderGanttOptions = { units
     root,
     sink,
     dropNodes,
+    palette: theme,
   });
 
   const arrows = buildArrows(layout.barByName, layout.depth, layout.critSet);

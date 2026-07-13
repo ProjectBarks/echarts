@@ -1,5 +1,34 @@
 import { describe, test, expect } from 'vitest';
-import { resolveTheme, pickTheme, THEMES, COLORS } from '../../graphs/common/theme.js';
+import { resolveTheme, pickTheme, withAlpha, THEMES, COLORS } from '../../graphs/common/theme.js';
+
+describe('withAlpha', () => {
+  test('applies alpha to hex, short hex, rgb, and rgba inputs', () => {
+    expect(withAlpha('#ff6b6b', 0.9)).toBe('rgba(255,107,107,0.9)');
+    expect(withAlpha('#fff', 0.5)).toBe('rgba(255,255,255,0.5)');
+    expect(withAlpha('rgb(10, 20, 30)', 0.3)).toBe('rgba(10,20,30,0.3)');
+    expect(withAlpha('rgba(10,20,30,0.8)', 0.2)).toBe('rgba(10,20,30,0.2)');
+  });
+});
+
+describe('pickTheme accents from Grafana', () => {
+  test('overrides semantic accents from Grafana colors (string or {main})', () => {
+    const t = pickTheme(undefined, {
+      isDark: true,
+      colors: { error: { main: '#e0226e' }, warning: '#ff9900', info: { main: '#3871dc' }, success: { main: '#1b855e' } },
+    });
+    expect(t.crit).toBe('#e0226e');
+    expect(t.dp).toBe('#ff9900');
+    expect(t.gate).toBe('#3871dc');
+    expect(t.meta).toBe('#1b855e');
+    // chrome still follows dark mode
+    expect(t.tooltipBg).toBe(THEMES.dark.tooltipBg);
+  });
+  test('keeps default accents (and preset identity) when Grafana has no colors', () => {
+    const t = pickTheme(undefined, { isDark: false });
+    expect(t).toBe(THEMES.light);
+    expect(t.crit).toBe(COLORS.crit);
+  });
+});
 
 describe('pickTheme', () => {
   test('an explicit option always wins over the Grafana theme', () => {

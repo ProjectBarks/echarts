@@ -3,8 +3,8 @@
 // confirm is live: esm.sh serves `@main` from a cache, so the console line is
 // how you verify the panel is running the build you just pushed rather than a
 // stale one. Keep SEMVER in sync with package.json's "version".
-export const SEMVER = '1.0.0';
-export const BUILD_STAMP = '2026-07-10';
+export const SEMVER = '1.0.1';
+export const BUILD_STAMP = '2026-07-13';
 export const VERSION = SEMVER + ' (' + BUILD_STAMP + ')';
 
 // Log once per render. `chart` is only used to disambiguate which renderer

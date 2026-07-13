@@ -1,6 +1,5 @@
 import type { EChartsOption } from 'echarts/types/dist/shared';
 import { barRenderItem, arrowRenderItem, arrowHeadRenderItem } from './render-item.js';
-import { COLORS } from '../common/theme.js';
 import type { ChartTheme } from '../common/theme.js';
 import type { GanttBar, GanttArrow } from './types.js';
 
@@ -71,7 +70,7 @@ export function assembleGanttOption(args: AssembleGanttArgs): EChartsOption {
       left: 'center',
       top: 6,
       textStyle: { color: theme.text },
-      subtextStyle: { fontSize: 12, color: COLORS.crit, fontWeight: 500 },
+      subtextStyle: { fontSize: 12, color: theme.crit, fontWeight: 500 },
     },
     grid: { left: 190, right: 48, top: 52, bottom: 68 },
     xAxis: {

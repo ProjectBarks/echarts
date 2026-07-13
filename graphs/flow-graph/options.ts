@@ -113,7 +113,7 @@ export function assembleOption(args: AssembleArgs): EChartsOption {
           focus: 'adjacency',
           itemStyle: { borderWidth: 4, borderColor: theme.emphasisBorder },
           lineStyle: { width: 3.5 },
-          label: { fontSize: 11, fontWeight: 'bold', color: '#fff' },
+          label: { fontSize: 11, fontWeight: 'bold', color: theme.emphasisLabel },
         },
         blur: {
           itemStyle: { opacity: 0.12 },

@@ -1,3 +1,6 @@
+import { THEMES } from './theme.js';
+import type { ChartTheme } from './theme.js';
+
 export function createEl<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   style: Partial<CSSStyleDeclaration> = {},
@@ -9,7 +12,7 @@ export function createEl<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
-export function showToast(container: HTMLElement, msg: string): void {
+export function showToast(container: HTMLElement, msg: string, theme: ChartTheme = THEMES.dark): void {
   const toast = createEl('div', {
     position: 'absolute',
     bottom: '40px',
@@ -18,8 +21,8 @@ export function showToast(container: HTMLElement, msg: string): void {
     padding: '6px 14px',
     borderRadius: '4px',
     fontSize: '11px',
-    color: '#fff',
-    background: 'rgba(40,167,69,0.9)',
+    color: theme.successText,
+    background: theme.successBg,
     pointerEvents: 'none',
     transition: 'opacity 0.3s',
   });

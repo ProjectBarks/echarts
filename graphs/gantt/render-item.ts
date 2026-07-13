@@ -1,4 +1,5 @@
 import { GANTT } from './constants.js';
+import { withAlpha } from '../common/theme.js';
 import type { ChartTheme } from '../common/theme.js';
 
 /** Pixel height of one category row, used to scale bars to the available space. */
@@ -126,7 +127,7 @@ export function arrowRenderItem(theme: ChartTheme) {
     const op = api.value(7) as number;
     const a = op === undefined ? 1 : op;
     const e = arrowElbow(api);
-    const color = isCrit ? GANTT.critArrow : theme.arrow;
+    const color = isCrit ? withAlpha(theme.crit, 0.9) : theme.arrow;
     return {
       type: 'polyline',
       z2: isCrit ? 6 : 3,
@@ -145,7 +146,7 @@ export function arrowHeadRenderItem(theme: ChartTheme) {
     const a = op === undefined ? 1 : op;
     const e = arrowElbow(api);
     const s = GANTT.arrowHead;
-    const color = isCrit ? GANTT.critArrow : theme.arrowHead;
+    const color = isCrit ? withAlpha(theme.crit, 0.9) : theme.arrowHead;
     const [x, y] = e.head;
     return {
       type: 'polygon',

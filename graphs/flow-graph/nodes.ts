@@ -13,12 +13,15 @@ export interface NodeColorCtx {
   nodeLat: NodeLatMap;
 }
 
-export function nodeColor(name: string, ctx: NodeColorCtx): string {
+/** Semantic accent palette (crit/dp/gate/meta); defaults to COLORS. */
+type Palette = { crit: string; dp: string; gate: string; meta: string };
+
+export function nodeColor(name: string, ctx: NodeColorCtx, palette: Palette = COLORS): string {
   const { root, sink, critSet, nodeLat } = ctx;
-  if (name === root || name === sink) return COLORS.meta;
-  if (critSet.has(name) && (nodeLat[name] || 0) > 0) return COLORS.crit;
-  if (name.endsWith('predicate')) return COLORS.gate;
-  return COLORS.dp;
+  if (name === root || name === sink) return palette.meta;
+  if (critSet.has(name) && (nodeLat[name] || 0) > 0) return palette.crit;
+  if (name.endsWith('predicate')) return palette.gate;
+  return palette.dp;
 }
 
 export interface BuildNodesCtx {
@@ -39,7 +42,7 @@ export function buildNodes(nodeLat: NodeLatMap, ctx: BuildNodesCtx): GraphNode[]
     .sort((a, b) => b[1] - a[1])
     .map(([name, lat]) => {
       const pos = nodePos[name] || { x: 0, y: 0 };
-      const col = nodeColor(name, { root, sink, critSet, nodeLat });
+      const col = nodeColor(name, { root, sink, critSet, nodeLat }, theme);
       const cumul = cumulLat[name] || 0;
       const pct = Math.min(0.98, Math.max(0.03, cumul / maxCumul));
       const isCrit = critSet.has(name) && lat > 0;

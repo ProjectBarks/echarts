@@ -1,8 +1,4 @@
-export const GANTT_DEFAULTS = {
-  root: 'FLOW_START',
-  sink: 'setresults',
-  percentileVar: '$percentile',
-} as const;
+export { GRAPH_DEFAULTS as GANTT_DEFAULTS } from '../common/constants.js';
 
 // Pixel geometry used by the custom renderItem callbacks.
 export const GANTT = {
@@ -13,5 +9,4 @@ export const GANTT = {
   exitPx: 8, // min horizontal stub out of the source's front (start of line) - kept short
   arrowHead: 8,
   minBarPx: 11, // smallest rendered bar width so sub-millisecond tasks stay visible
-  critArrow: 'rgba(255,107,107,0.9)',
 } as const;

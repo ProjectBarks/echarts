@@ -1,5 +1,4 @@
-import { ICON } from '../flow-graph/constants.js';
-import { COLORS } from '../common/theme.js';
+import { ICON } from '../common/constants.js';
 import { createEl, showToast } from '../common/dom.js';
 import { collectReachable } from '../common/graph.js';
 import type { EChartsLike, NodeLatMap, AdjMap } from '../common/types.js';
@@ -113,10 +112,10 @@ export function setupGanttHover(ctx: GanttHoverCtx): void {
 // Manual node-type legend as a graphic group (Gantt custom series have no categories).
 export function buildGanttLegend(theme: ChartTheme): any {
   const rows = [
-    { c: COLORS.crit, t: 'Critical' },
-    { c: COLORS.gate, t: 'Gate' },
-    { c: COLORS.dp, t: 'Data provider' },
-    { c: COLORS.meta, t: 'Flow start/sink' },
+    { c: theme.crit, t: 'Critical' },
+    { c: theme.gate, t: 'Gate' },
+    { c: theme.dp, t: 'Data provider' },
+    { c: theme.meta, t: 'Flow start/sink' },
   ];
   // Horizontal legend centered under the plot area (see the grid bottom offset).
   const children: any[] = [];
@@ -148,7 +147,7 @@ export function setupGanttSlider(chart: EChartsLike, ctx: GanttControlsCtx): HTM
   wrap.className = 'gantt-lat-slider';
   const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
   label.textContent = 'Min: 0%';
-  const slider = createEl('input', { width: '100px', accentColor: '#ffa94d', cursor: 'pointer' });
+  const slider = createEl('input', { width: '100px', accentColor: theme.dp, cursor: 'pointer' });
   slider.type = 'range'; slider.min = '0'; slider.max = '50'; slider.value = '0';
   const rowName = rowNameMap(barData);
   slider.addEventListener('input', () => {
@@ -180,9 +179,9 @@ export function buildGanttControls(chart: EChartsLike, ctx: GanttControlsCtx): G
   let critOnly = false;
   const copyGroup = iconButton(theme, ICON.size * 2 + ICON.gap * 2 + 8, '📋', theme.buttonGlyph, 12, () => {
     navigator.clipboard.writeText(buildMermaid());
-    showToast(container, 'Mermaid copied');
+    showToast(container, 'Mermaid copied', theme);
   });
-  const critOnlyGroup = iconButton(theme, ICON.size + ICON.gap + 8, '⚡', '#ff6b6b', 13, () => {
+  const critOnlyGroup = iconButton(theme, ICON.size + ICON.gap + 8, '⚡', theme.crit, 13, () => {
     critOnly = !critOnly;
     if (critOnly) {
       const keepArrow = (v: any[]) => critSet.has(rowName.get(v[1]) || '') && critSet.has(rowName.get(v[3]) || '');
@@ -191,7 +190,7 @@ export function buildGanttControls(chart: EChartsLike, ctx: GanttControlsCtx): G
       resetDim(chart, barData, arrowData);
     }
   });
-  const sliderGroup = iconButton(theme, 8, '◔', '#ffa94d', 14, () => {
+  const sliderGroup = iconButton(theme, 8, '◔', theme.dp, 14, () => {
     if (sliderPopover) sliderPopover.style.display = sliderPopover.style.display === 'none' ? 'flex' : 'none';
   });
   return { graphic: [buildGanttLegend(theme), copyGroup, critOnlyGroup, sliderGroup], sliderPopover, copyGroup, critOnlyGroup, sliderGroup };

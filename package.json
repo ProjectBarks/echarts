@@ -1,6 +1,6 @@
 {
   "name": "echarts-internal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Zero-config DAG flow visualizer for ECharts — drop-in critical path analysis, barycenter layout, and interactive filtering for Grafana Business Charts panels",
   "type": "module",
   "main": "./dist/index.js",

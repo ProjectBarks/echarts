@@ -34,7 +34,7 @@ export function setupSlider(chart: EChartsLike, ctx: SliderCtx): HTMLElement | n
   wrap.className = 'lat-slider';
   const label = createEl('span', { color: theme.textMuted, fontSize: '10px', whiteSpace: 'nowrap' });
   label.textContent = 'Min: 0%';
-  const slider = createEl('input', { width: '100px', accentColor: '#ffa94d', cursor: 'pointer' });
+  const slider = createEl('input', { width: '100px', accentColor: theme.dp, cursor: 'pointer' });
   slider.type = 'range';
   slider.min = '0';
   slider.max = '50';
@@ -94,7 +94,7 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
       z: 100,
       onclick: function () {
         navigator.clipboard.writeText(buildMermaid());
-        showToast(container, 'Mermaid copied');
+        showToast(container, 'Mermaid copied', theme);
       },
       children: [
         {
@@ -130,7 +130,7 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
         },
         {
           type: 'text',
-          style: { text: '⚡', x: icoS / 2, y: icoS / 2, fill: '#ff6b6b', fontSize: 13, textAlign: 'center', textVerticalAlign: 'middle' },
+          style: { text: '⚡', x: icoS / 2, y: icoS / 2, fill: theme.crit, fontSize: 13, textAlign: 'center', textVerticalAlign: 'middle' },
           z2: 2,
         },
       ],
@@ -152,7 +152,7 @@ export function buildGraphicButtons(chart: EChartsLike, ctx: GraphicCtx): any[] 
         },
         {
           type: 'text',
-          style: { text: '◔', x: icoS / 2, y: icoS / 2, fill: '#ffa94d', fontSize: 14, textAlign: 'center', textVerticalAlign: 'middle' },
+          style: { text: '◔', x: icoS / 2, y: icoS / 2, fill: theme.dp, fontSize: 14, textAlign: 'center', textVerticalAlign: 'middle' },
           z2: 2,
         },
       ],

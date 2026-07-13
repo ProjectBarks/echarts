@@ -1,7 +1,7 @@
 import type { EChartsOption } from 'echarts/types/dist/shared';
 import type { GrafanaContext, ReplaceVariables } from '../common/types.js';
 import type { RenderFlowGraphOptions } from './types.js';
-import { DEFAULTS, COLORS } from './constants.js';
+import { DEFAULTS } from './constants.js';
 import { parseSeries, buildLatencyAndEdges, findCriticalPath, dropZeroPredicates, computeCleanEdges } from './data.js';
 import { computeLayout } from './layout.js';
 import { buildNodes } from './nodes.js';
@@ -64,15 +64,15 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
   const { nodePos, cumulLat, maxCumul, maxLat, fwd, bwd } = layout;
 
   const nodes = buildNodes(nodeLat, { nodePos, cumulLat, maxCumul, critSet, nodeSize, root, sink, units, theme });
-  const links = buildLinks(cleanEdges, critSet);
-  for (const l of buildTransitiveHoverEdges(nodeLat, fwd, bwd, cleanEdges)) links.push(l);
+  const links = buildLinks(cleanEdges, critSet, theme);
+  for (const l of buildTransitiveHoverEdges(nodeLat, fwd, bwd, cleanEdges, theme)) links.push(l);
 
   const cats = [
-    { name: 'flow start', itemStyle: { color: COLORS.meta } },
-    { name: 'predicate', itemStyle: { color: COLORS.gate } },
-    { name: 'data provider', itemStyle: { color: COLORS.dp } },
-    { name: 'sink', itemStyle: { color: COLORS.meta } },
-    { name: 'critical', itemStyle: { color: COLORS.crit } },
+    { name: 'flow start', itemStyle: { color: theme.meta } },
+    { name: 'predicate', itemStyle: { color: theme.gate } },
+    { name: 'data provider', itemStyle: { color: theme.dp } },
+    { name: 'sink', itemStyle: { color: theme.meta } },
+    { name: 'critical', itemStyle: { color: theme.crit } },
   ];
   const critChain = crit.path.split('_').join(' → ');
 
@@ -86,7 +86,7 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
 
   const sliderPopover = setupSlider(chart, { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink, theme });
   const graphic = buildGraphicButtons(chart, {
-    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet, units),
+    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet, units, theme.crit),
     sliderPopover,
     fullNodes,
     fullLinks,
@@ -104,7 +104,7 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
     cats,
     graphic,
     subtext,
-    critColor: COLORS.crit,
+    critColor: theme.crit,
     formatter,
     legendData: cats.map((c) => c.name),
     theme,

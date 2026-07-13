@@ -10,16 +10,19 @@ export interface BarColorCtx {
   nodeLat: NodeLatMap;
 }
 
-export function barColor(name: string, ctx: BarColorCtx): string {
+/** Semantic accent palette (crit/dp/gate/meta); defaults to COLORS. */
+type Palette = { crit: string; dp: string; gate: string; meta: string };
+
+export function barColor(name: string, ctx: BarColorCtx, palette: Palette = COLORS): string {
   const { root, sink, critSet, nodeLat } = ctx;
-  if (name === root || name === sink) return COLORS.meta;
+  if (name === root || name === sink) return palette.meta;
   // Every node on the critical path is colored crit, including any zero-latency
   // intermediate (predicates/gates that carry duration are dropped upstream, so
   // this never mis-colors a gate). nodeLat is kept in the signature for callers.
-  if (critSet.has(name)) return COLORS.crit;
+  if (critSet.has(name)) return palette.crit;
   void nodeLat;
-  if (name.endsWith('predicate')) return COLORS.gate;
-  return COLORS.dp;
+  if (name.endsWith('predicate')) return palette.gate;
+  return palette.dp;
 }
 
 export interface ComputeGanttArgs {
@@ -29,6 +32,7 @@ export interface ComputeGanttArgs {
   root: string;
   sink: string;
   dropNodes?: Set<string>;
+  palette?: Palette;
 }
 
 export function computeGanttLayout(args: ComputeGanttArgs): GanttLayout {
@@ -139,7 +143,7 @@ export function computeGanttLayout(args: ComputeGanttArgs): GanttLayout {
     duration: dur(name),
     depth: depth[name] || 0,
     isCrit: critSet.has(name),
-    color: barColor(name, { root, sink, critSet, nodeLat }),
+    color: barColor(name, { root, sink, critSet, nodeLat }, args.palette || COLORS),
   }));
 
   const rowOf: Record<string, number> = {};

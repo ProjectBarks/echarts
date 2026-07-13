@@ -1,10 +1,12 @@
 import type { GraphSeriesOption } from 'echarts/types/dist/shared';
 import { collectReachable } from '../common/graph.js';
+import { THEMES, withAlpha } from '../common/theme.js';
+import type { ChartTheme } from '../common/theme.js';
 import type { EdgeMap, AdjMap, NodeLatMap } from '../common/types.js';
 
 type GraphLink = NonNullable<GraphSeriesOption['links']>[number];
 
-export function buildLinks(cleanEdges: EdgeMap, critSet: Set<string>): GraphLink[] {
+export function buildLinks(cleanEdges: EdgeMap, critSet: Set<string>, theme: ChartTheme = THEMES.dark): GraphLink[] {
   return Object.entries(cleanEdges).map(([key, lat]) => {
     const [src, tgt] = key.split('__');
     const isCrit = critSet.has(src) && critSet.has(tgt);
@@ -14,7 +16,7 @@ export function buildLinks(cleanEdges: EdgeMap, critSet: Set<string>): GraphLink
       value: Math.round(lat),
       lineStyle: {
         width: isCrit ? 2.5 : 1,
-        color: isCrit ? 'rgba(255,107,107,0.7)' : 'rgba(150,150,160,0.35)',
+        color: isCrit ? withAlpha(theme.crit, 0.7) : theme.linkMuted,
         type: isCrit ? 'solid' : 'dashed',
         curveness: 0,
       },
@@ -27,6 +29,7 @@ export function buildTransitiveHoverEdges(
   fwd: AdjMap,
   bwd: AdjMap,
   cleanEdges: EdgeMap,
+  theme: ChartTheme = THEMES.dark,
 ): GraphLink[] {
   const links: GraphLink[] = [];
   for (const name of Object.keys(nodeLat)) {
@@ -45,7 +48,7 @@ export function buildTransitiveHoverEdges(
           source: name,
           target: other,
           symbol: ['none', 'none'],
-          lineStyle: { width: 0, opacity: 0, color: 'rgba(0,0,0,0)' },
+          lineStyle: { width: 0, opacity: 0, color: theme.transparent },
           emphasis: { lineStyle: { width: 0, opacity: 0 } },
         } as unknown as GraphLink);
       }
