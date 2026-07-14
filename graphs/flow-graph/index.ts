@@ -62,7 +62,7 @@ function renderFlowGraph(context: GrafanaContext, opts: RenderFlowGraphOptions =
 
   const sliderPopover = setupSlider(chart, { fullNodes, fullLinks, nodeLat, maxLat, critSet, root, sink, theme });
   const graphic = buildGraphicButtons(chart, {
-    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet, units, theme.crit),
+    buildMermaid: () => buildMermaid(nodeLat, cleanEdges, critSet, units, theme.crit, theme.emphasisLabel),
     sliderPopover,
     fullNodes,
     fullLinks,

@@ -3,7 +3,7 @@
 // confirm is live: esm.sh serves `@main` from a cache, so the console line is
 // how you verify the panel is running the build you just pushed rather than a
 // stale one. Keep SEMVER in sync with package.json's "version".
-export const SEMVER = '1.0.1';
+export const SEMVER = '1.0.2';
 export const BUILD_STAMP = '2026-07-13';
 export const VERSION = SEMVER + ' (' + BUILD_STAMP + ')';
 

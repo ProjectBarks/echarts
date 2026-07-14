@@ -117,8 +117,10 @@ export type ThemeName = 'light' | 'dark' | 'auto';
 
 /**
  * Returns `color` at the given alpha as an rgba() string. Accepts #rgb, #rrggbb,
- * rgb(), and rgba() inputs (Grafana colors may be any of these), so accent tints
- * can be derived from a single source color instead of hardcoding each variant.
+ * #rrggbbaa, rgb(), and rgba() inputs (Grafana colors may be any of these), so
+ * accent tints can be derived from a single source color instead of hardcoding
+ * each variant. Unrecognized formats (hsl(), var(), named colors) are returned
+ * unchanged rather than mis-rendered.
  */
 export function withAlpha(color: string, alpha: number): string {
   const c = color.trim();
@@ -127,9 +129,9 @@ export function withAlpha(color: string, alpha: number): string {
     const [r, g, b] = short[1].split('').map((h) => parseInt(h + h, 16));
     return `rgba(${r},${g},${b},${alpha})`;
   }
-  const long = /^#([0-9a-fA-F]{6})$/.exec(c);
+  const long = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.exec(c);
   if (long) {
-    const n = parseInt(long[1], 16);
+    const n = parseInt(long[1].slice(0, 6), 16);
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
   }
   const rgb = /^rgba?\(([^)]+)\)$/.exec(c);

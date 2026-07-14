@@ -2,11 +2,16 @@ import { describe, test, expect } from 'vitest';
 import { resolveTheme, pickTheme, withAlpha, THEMES, COLORS } from '../../graphs/common/theme.js';
 
 describe('withAlpha', () => {
-  test('applies alpha to hex, short hex, rgb, and rgba inputs', () => {
+  test('applies alpha to hex, short hex, 8-digit hex, rgb, and rgba inputs', () => {
     expect(withAlpha('#ff6b6b', 0.9)).toBe('rgba(255,107,107,0.9)');
     expect(withAlpha('#fff', 0.5)).toBe('rgba(255,255,255,0.5)');
+    expect(withAlpha('#ff6b6bcc', 0.9)).toBe('rgba(255,107,107,0.9)');
     expect(withAlpha('rgb(10, 20, 30)', 0.3)).toBe('rgba(10,20,30,0.3)');
     expect(withAlpha('rgba(10,20,30,0.8)', 0.2)).toBe('rgba(10,20,30,0.2)');
+  });
+  test('returns unrecognized formats unchanged rather than mis-rendering', () => {
+    expect(withAlpha('hsl(0, 100%, 50%)', 0.5)).toBe('hsl(0, 100%, 50%)');
+    expect(withAlpha('var(--accent)', 0.5)).toBe('var(--accent)');
   });
 });
 

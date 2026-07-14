@@ -1,4 +1,4 @@
-import { COLORS } from '../common/theme.js';
+import { COLORS, THEMES } from '../common/theme.js';
 import type { EdgeMap, NodeLatMap } from '../common/types.js';
 
 export function buildMermaid(
@@ -7,6 +7,7 @@ export function buildMermaid(
   critSet: Set<string>,
   units: string,
   critColor: string = COLORS.crit,
+  labelColor: string = THEMES.dark.emphasisLabel,
 ): string {
   let md = 'flowchart LR\n';
   for (const name of Object.keys(nodeLat)) {
@@ -20,6 +21,6 @@ export function buildMermaid(
     const [s, t] = key.split('__');
     md += critSet.has(s) && critSet.has(t) ? '  ' + s + ' ==> ' + t + '\n' : '  ' + s + ' --> ' + t + '\n';
   }
-  md += '  classDef crit fill:' + critColor + ',stroke:' + critColor + ',color:#fff\n';
+  md += '  classDef crit fill:' + critColor + ',stroke:' + critColor + ',color:' + labelColor + '\n';
   return md;
 }
